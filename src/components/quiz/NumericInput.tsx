@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface NumericInputProps {
@@ -62,65 +60,80 @@ export function NumericInput({
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 w-full max-w-xs mx-auto">
+    <div className="flex flex-col items-center gap-8 w-full py-8">
+      {/* Unit selector */}
       {unitOptions && unitOptions.length > 1 && (
-        <div className="flex gap-2 p-1 bg-muted rounded-lg">
+        <div className="flex gap-2 p-1.5 bg-muted rounded-2xl">
           {unitOptions.map((u) => (
-            <Button
+            <button
               key={u}
-              variant={selectedUnit === u ? "default" : "ghost"}
-              size="sm"
               onClick={() => setSelectedUnit(u)}
-              className="px-4"
+              className={cn(
+                "px-6 py-3 rounded-xl font-semibold text-base transition-all duration-200",
+                selectedUnit === u
+                  ? "bg-primary text-primary-foreground shadow-md"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
             >
               {u}
-            </Button>
+            </button>
           ))}
         </div>
       )}
 
-      <div className="flex items-center gap-4">
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-12 w-12 rounded-full text-2xl"
+      {/* Main input area */}
+      <div className="flex items-center gap-6">
+        <button
+          className={cn(
+            "w-16 h-16 rounded-2xl border-2 border-border bg-card flex items-center justify-center text-3xl font-semibold transition-all duration-200",
+            "hover:border-primary/50 hover:bg-primary/5 active:scale-95",
+            (value || 0) <= min && "opacity-40 cursor-not-allowed"
+          )}
           onClick={handleDecrement}
           disabled={(value || 0) <= min}
         >
           −
-        </Button>
+        </button>
 
         <div className="relative">
-          <Input
+          <input
             type="number"
             value={inputValue}
             onChange={handleChange}
             placeholder={placeholder}
             className={cn(
-              "text-center text-4xl font-bold h-20 w-32",
-              "border-2 rounded-xl focus:ring-2 focus:ring-primary",
+              "w-40 h-24 text-center font-display text-5xl sm:text-6xl font-semibold bg-transparent",
+              "border-2 border-border rounded-2xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20",
+              "transition-all duration-200",
               "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             )}
             min={min}
             max={max}
           />
           {selectedUnit && (
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+            <span className="absolute -right-12 top-1/2 -translate-y-1/2 text-xl font-medium text-muted-foreground">
               {selectedUnit}
             </span>
           )}
         </div>
 
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-12 w-12 rounded-full text-2xl"
+        <button
+          className={cn(
+            "w-16 h-16 rounded-2xl border-2 border-border bg-card flex items-center justify-center text-3xl font-semibold transition-all duration-200",
+            "hover:border-primary/50 hover:bg-primary/5 active:scale-95",
+            (value || 0) >= max && "opacity-40 cursor-not-allowed"
+          )}
           onClick={handleIncrement}
           disabled={(value || 0) >= max}
         >
           +
-        </Button>
+        </button>
       </div>
+
+      {/* Range indicator */}
+      <p className="text-sm text-muted-foreground">
+        Enter a value between {min} and {max}
+      </p>
     </div>
   );
 }

@@ -29,36 +29,35 @@ export function MultiSelect({ options, value = [], onChange }: MultiSelectProps)
   };
 
   return (
-    <div className="flex flex-col gap-3 w-full">
-      {options.map((option) => {
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+      {options.map((option, index) => {
         const isSelected = value.includes(option.id);
         return (
           <button
             key={option.id}
             onClick={() => handleToggle(option.id)}
             className={cn(
-              "flex items-center justify-between p-4 rounded-xl border-2 transition-all duration-200",
+              "quiz-option flex items-center gap-4 p-5 rounded-2xl border-2 transition-all duration-200 text-left",
               "hover:border-primary/50 hover:bg-primary/5",
               isSelected
-                ? "border-primary bg-primary/10"
-                : "border-border bg-card"
+                ? "border-primary bg-primary/10 shadow-lg shadow-primary/10"
+                : "border-border bg-card hover:shadow-md"
             )}
+            style={{ animationDelay: `${index * 30}ms` }}
           >
-            <div className="flex items-center gap-3">
-              {option.icon && (
-                <span className="text-xl">{option.icon}</span>
-              )}
-              <span className="font-medium text-left">{option.label}</span>
-            </div>
+            {option.icon && (
+              <span className="text-2xl flex-shrink-0">{option.icon}</span>
+            )}
+            <span className="flex-1 font-medium text-base">{option.label}</span>
             <div
               className={cn(
-                "w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all",
+                "w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all flex-shrink-0",
                 isSelected
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-muted-foreground/30"
               )}
             >
-              {isSelected && <Check className="w-4 h-4" />}
+              {isSelected && <Check className="w-4 h-4" strokeWidth={3} />}
             </div>
           </button>
         );

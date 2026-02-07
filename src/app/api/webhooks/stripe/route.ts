@@ -102,13 +102,16 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   }
 
   // Create or update subscription record
-  const { error } = await supabase.from("subscriptions").upsert({
-    user_id: userId,
-    stripe_customer_id: customerId,
-    stripe_subscription_id: subscriptionId,
-    status: "active",
-    plan: session.metadata?.plan || "monthly",
-  });
+  const { error } = await supabase.from("subscriptions").upsert(
+    {
+      user_id: userId,
+      stripe_customer_id: customerId,
+      stripe_subscription_id: subscriptionId,
+      status: "active",
+      plan: session.metadata?.plan || "monthly",
+    },
+    { onConflict: "stripe_subscription_id" }
+  );
 
   if (error) {
     console.error("Error creating subscription:", error);

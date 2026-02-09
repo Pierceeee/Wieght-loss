@@ -5,6 +5,7 @@ import { z } from "zod";
 
 // Request body validation schema
 const userProfileSchema = z.object({
+  gender: z.enum(["male", "female"]),
   age: z.number().min(18).max(100),
   height: z.number().min(100).max(250),
   currentWeight: z.number().min(30).max(300),
@@ -20,6 +21,7 @@ const userProfileSchema = z.object({
   moodIssues: z.string(),
   weightLossHistory: z.string(),
   energyLevels: z.string(),
+  fitnessLevel: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -70,9 +72,9 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({
-    message: "PCOS Plan API - Generate Meal Plan",
+    message: "Perfect Body API - Generate Meal Plan",
     method: "POST",
-    description: "Send a user profile to generate a personalized PCOS-friendly meal plan",
+    description: "Send a user profile to generate a personalized meal plan",
     configured: isAIConfigured(),
   });
 }

@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import {
-  ProgressBar,
   SingleSelect,
   MultiSelect,
   NumericInput,
@@ -12,47 +10,76 @@ import {
   Interstitial,
   AnalyzingAnimation,
 } from "@/components/quiz";
-import { getQuestionByStep, TOTAL_STEPS } from "@/lib/quiz-data";
+import { getQuestionByStep, getTotalSteps } from "@/lib/quiz-data";
 import { useQuizStore } from "@/hooks/useQuizState";
+import { startFunnelSubmission } from "@/lib/actions/submit-quiz";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 export default function QuizStepPage() {
   const router = useRouter();
   const params = useParams();
   const step = parseInt(params.step as string, 10);
+  const gender = params.gender as "male" | "female";
 
   const {
     setResponse,
     setCurrentStep,
     getResponse,
+    sessionId,
+    responses,
+    setGender,
   } = useQuizStore();
 
   const [isClient, setIsClient] = useState(false);
+  const [submissionCreated, setSubmissionCreated] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
     setCurrentStep(step);
-  }, [step, setCurrentStep]);
+    // Set gender in store
+    if (gender) {
+      setGender(gender);
+    }
+  }, [step, setCurrentStep, gender, setGender]);
 
-  const question = getQuestionByStep(step);
+  // Create initial funnel submission when user starts the quiz (step 1)
+  useEffect(() => {
+    if (step === 1 && sessionId && !submissionCreated) {
+      startFunnelSubmission(sessionId, { ...responses, gender })
+        .then((result) => {
+          if (result.success) {
+            console.log("Funnel submission created:", result.id);
+            setSubmissionCreated(true);
+          } else {
+            console.warn("Failed to create funnel submission:", result.error);
+          }
+        })
+        .catch((error) => {
+          console.error("Error creating funnel submission:", error);
+        });
+    }
+  }, [step, sessionId, responses, submissionCreated, gender]);
+
+  const question = getQuestionByStep(step, gender);
+  const totalSteps = getTotalSteps(gender);
 
   if (!isClient) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-background">
-        <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[#f0f4f8]">
+        <div className="w-10 h-10 border-4 border-slate-300 border-t-slate-900 rounded-full animate-spin" />
       </div>
     );
   }
 
-  if (!question || step < 1 || step > TOTAL_STEPS) {
-    router.push("/quiz/1");
+  if (!question || step < 1 || step > totalSteps) {
+    router.push(`/quiz/${gender}/1`);
     return null;
   }
 
   // Handle Analyzing Step (Step 20) with Animation
   if (question.type === "interstitial" && question.id === "processing") {
     return (
-      <div className="h-screen w-screen bg-background flex items-center justify-center noise-texture">
+      <div className="min-h-screen bg-[#f0f4f8] flex items-center justify-center">
         <AnalyzingAnimation />
       </div>
     );
@@ -61,16 +88,16 @@ export default function QuizStepPage() {
   const currentValue = getResponse(question.id);
 
   const handleNext = () => {
-    if (step === TOTAL_STEPS) {
+    if (step === totalSteps) {
       router.push("/timeline");
     } else {
-      router.push(`/quiz/${step + 1}`);
+      router.push(`/quiz/${gender}/${step + 1}`);
     }
   };
 
   const handleBack = () => {
     if (step > 1) {
-      router.push(`/quiz/${step - 1}`);
+      router.push(`/quiz/${gender}/${step - 1}`);
     } else {
       router.push("/");
     }
@@ -146,44 +173,44 @@ export default function QuizStepPage() {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-background overflow-hidden noise-texture">
-      {/* Header - minimal and integrated */}
-      <header className="flex-shrink-0 px-4 sm:px-8 pt-4 sm:pt-6 pb-2">
-        <div className="flex items-center gap-4 max-w-4xl mx-auto">
+    <div className="min-h-screen flex flex-col bg-[#f0f4f8]">
+      {/* Header */}
+      <header className="flex-shrink-0 px-4 sm:px-8 py-4 sm:py-6 bg-white/80 backdrop-blur-sm border-b border-slate-200/50">
+        <div className="flex items-center gap-4 max-w-3xl mx-auto">
           <button
             onClick={handleBack}
-            className="p-2.5 rounded-xl hover:bg-muted transition-colors"
+            className="p-2.5 rounded-full hover:bg-slate-100 transition-colors"
             aria-label="Go back"
           >
-            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+            <ArrowLeft className="w-5 h-5 text-slate-600" />
           </button>
           
           <div className="flex-1 flex items-center gap-4">
-            <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+            <div className="flex-1 h-2.5 bg-slate-200 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-primary rounded-full progress-glow transition-all duration-500 ease-out"
-                style={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
+                className="h-full bg-slate-900 rounded-full transition-all duration-500 ease-out"
+                style={{ width: `${(step / totalSteps) * 100}%` }}
               />
             </div>
-            <span className="text-sm font-medium text-muted-foreground tabular-nums min-w-[60px] text-right">
-              {step} / {TOTAL_STEPS}
+            <span className="text-sm font-bold text-slate-500 tabular-nums min-w-[60px] text-right">
+              {step}/{totalSteps}
             </span>
           </div>
         </div>
       </header>
 
-      {/* Main content - maximized */}
+      {/* Main content */}
       <main className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-8 sm:py-12">
           <div className="max-w-2xl mx-auto h-full flex flex-col">
             {/* Question Title */}
             {question.type !== "interstitial" && question.question && (
-              <div className="text-center mb-8 animate-fade-up">
-                <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight mb-3">
+              <div className="text-center mb-10">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-900 mb-3">
                   {question.question}
                 </h1>
                 {question.subtitle && (
-                  <p className="text-muted-foreground text-base sm:text-lg">
+                  <p className="text-slate-500 text-base sm:text-lg">
                     {question.subtitle}
                   </p>
                 )}
@@ -191,7 +218,7 @@ export default function QuizStepPage() {
             )}
 
             {/* Question Content */}
-            <div className="flex-1 flex items-start justify-center animate-fade-up animate-delay-100">
+            <div className="flex-1 flex items-start justify-center">
               <div className="w-full">
                 {renderQuestionContent()}
               </div>
@@ -199,18 +226,21 @@ export default function QuizStepPage() {
           </div>
         </div>
 
-        {/* Footer - integrated CTA */}
-        <footer className="flex-shrink-0 px-4 sm:px-8 pb-6 pt-4 glass border-t border-border/50">
+        {/* Footer CTA */}
+        <footer className="flex-shrink-0 px-4 sm:px-8 pb-6 sm:pb-8 pt-4 bg-gradient-to-t from-[#f0f4f8] via-[#f0f4f8] to-transparent">
           <div className="max-w-2xl mx-auto">
-            <Button
+            <button
               onClick={handleNext}
               disabled={!canContinue()}
-              size="lg"
-              className="w-full h-14 sm:h-16 text-base sm:text-lg font-semibold rounded-2xl shadow-lg shadow-primary/20 disabled:shadow-none transition-all duration-300 group"
+              className="w-full h-14 sm:h-16 text-base sm:text-lg font-bold rounded-full
+                       bg-slate-900 text-white
+                       hover:bg-slate-800 hover:shadow-xl hover:shadow-slate-900/20 hover:-translate-y-0.5
+                       disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none disabled:translate-y-0 disabled:cursor-not-allowed
+                       transition-all duration-200 flex items-center justify-center gap-2 group"
             >
               Continue
-              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </button>
           </div>
         </footer>
       </main>

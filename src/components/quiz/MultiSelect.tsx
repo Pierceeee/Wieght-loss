@@ -37,24 +37,24 @@ export function MultiSelect({ options, value = [], onChange }: MultiSelectProps)
             key={option.id}
             onClick={() => handleToggle(option.id)}
             className={cn(
-              "quiz-option flex items-center gap-4 p-5 rounded-2xl border-2 transition-all duration-200 text-left",
-              "hover:border-primary/50 hover:bg-primary/5",
+              "flex items-center gap-4 p-5 rounded-2xl border-2 transition-all duration-200 text-left",
+              "hover:border-slate-400 hover:bg-white hover:shadow-md",
               isSelected
-                ? "border-primary bg-primary/10 shadow-lg shadow-primary/10"
-                : "border-border bg-card hover:shadow-md"
+                ? "border-slate-900 bg-white shadow-lg"
+                : "border-slate-200 bg-white/80"
             )}
             style={{ animationDelay: `${index * 30}ms` }}
           >
             {option.icon && (
               <span className="text-2xl flex-shrink-0">{option.icon}</span>
             )}
-            <span className="flex-1 font-medium text-base">{option.label}</span>
+            <span className="flex-1 font-bold text-base text-slate-900">{option.label}</span>
             <div
               className={cn(
                 "w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all flex-shrink-0",
                 isSelected
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-muted-foreground/30"
+                  ? "border-slate-900 bg-slate-900 text-white"
+                  : "border-slate-300"
               )}
             >
               {isSelected && <Check className="w-4 h-4" strokeWidth={3} />}

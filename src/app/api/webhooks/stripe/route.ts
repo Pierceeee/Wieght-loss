@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripeClient } from "@/lib/stripe";
-import { createServerClient, Database } from "@/lib/supabase";
+import { createServerClient, updateFunnelSubmission } from "@/lib/supabase";
 import Stripe from "stripe";
 
 /**
@@ -93,11 +93,27 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 
   const supabase = createServerClient();
   const userId = session.metadata?.userId;
+  const funnelSessionId = session.metadata?.funnelSessionId;
   const customerId = session.customer as string;
   const subscriptionId = session.subscription as string;
+  const planId = session.metadata?.planId;
 
+  // Mark funnel submission as purchased
+  if (funnelSessionId) {
+    try {
+      await updateFunnelSubmission(funnelSessionId, {
+        status: "purchased",
+      });
+      console.log(`Funnel submission ${funnelSessionId} marked as purchased`);
+    } catch (error) {
+      console.error("Error updating funnel submission:", error);
+      // Don't throw - we still want to process the subscription
+    }
+  }
+
+  // Only create subscription record if we have a userId
   if (!userId) {
-    console.error("No userId in session metadata");
+    console.log("No userId in session metadata, skipping subscription creation");
     return;
   }
 
@@ -107,7 +123,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     stripe_customer_id: customerId,
     stripe_subscription_id: subscriptionId,
     status: "active",
-    plan: session.metadata?.plan || "monthly",
+    plan: planId || session.metadata?.plan || "monthly",
   };
 
   const { error } = await supabase

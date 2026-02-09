@@ -2,20 +2,21 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "PCOS Plan - Personalized Weight Loss for Women with PCOS",
+  title: "Perfect Body - Personalized Weight Loss & Fitness Plans",
   description:
-    "Take control of PCOS with a personalized diet and lifestyle plan. Balance hormones, boost metabolism, and achieve sustainable weight loss.",
+    "Real results, real food, real simple. Get a personalized diet and fitness plan designed for your body. Lose weight, build muscle, and achieve your health goals.",
   keywords: [
-    "PCOS",
     "weight loss",
-    "hormone balance",
+    "fitness",
     "diet plan",
     "personalized nutrition",
+    "meal plan",
+    "PCOS",
   ],
   openGraph: {
-    title: "PCOS Plan - Personalized Weight Loss for Women with PCOS",
+    title: "Perfect Body - Personalized Weight Loss & Fitness Plans",
     description:
-      "Take control of PCOS with a personalized diet and lifestyle plan.",
+      "Real results, real food, real simple. Get your personalized plan today.",
     type: "website",
   },
 };

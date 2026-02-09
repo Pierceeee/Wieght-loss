@@ -46,6 +46,7 @@ export interface QuizState {
 }
 
 export interface UserProfile {
+  gender: "male" | "female";
   age: number;
   height: number;
   currentWeight: number;
@@ -61,6 +62,7 @@ export interface UserProfile {
   moodIssues: string;
   weightLossHistory: string;
   energyLevels: string;
+  fitnessLevel?: string; // Male-specific field
 }
 
 export interface BMIResult {

@@ -2,11 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuizStore } from "@/hooks/useQuizState";
 import {
-  Heart,
   ChefHat,
   RefreshCw,
   Calendar,
@@ -14,6 +11,9 @@ import {
   ShoppingCart,
   LogOut,
   Crown,
+  Flame,
+  Apple,
+  Dumbbell,
 } from "lucide-react";
 import { DayMealPlan, WeeklyMealPlan } from "@/types/user";
 
@@ -332,7 +332,7 @@ const demoMealPlan: WeeklyMealPlan = {
 };
 
 export default function DashboardPage() {
-  const { getUserProfile } = useQuizStore();
+  const { getUserProfile, gender } = useQuizStore();
   const [mealPlan, setMealPlan] = useState<WeeklyMealPlan | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedDay, setSelectedDay] = useState(0);
@@ -340,7 +340,6 @@ export default function DashboardPage() {
 
   useEffect(() => {
     setIsClient(true);
-    // Load demo plan for development
     setMealPlan(demoMealPlan);
   }, []);
 
@@ -376,240 +375,288 @@ export default function DashboardPage() {
 
   if (!isClient) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-[#f0f4f8]">
+        <div className="w-10 h-10 border-4 border-slate-300 border-t-slate-900 rounded-full animate-spin" />
       </div>
     );
   }
 
   const currentDay: DayMealPlan | undefined = mealPlan?.days[selectedDay];
+  
+  // Calculate daily totals
+  const dailyTotals = currentDay
+    ? {
+        calories:
+          currentDay.breakfast.calories +
+          currentDay.lunch.calories +
+          currentDay.dinner.calories +
+          (currentDay.snacks?.reduce((sum, s) => sum + s.calories, 0) || 0),
+        protein:
+          currentDay.breakfast.protein +
+          currentDay.lunch.protein +
+          currentDay.dinner.protein +
+          (currentDay.snacks?.reduce((sum, s) => sum + s.protein, 0) || 0),
+      }
+    : { calories: 0, protein: 0 };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#f0f4f8]">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="container max-w-6xl mx-auto px-4 py-4">
+      <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200/50 sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <Heart className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <span className="text-xl font-bold">PCOS Plan</span>
+              <span className="text-xl font-black tracking-tight text-slate-900">PERFECT</span>
+              <span className="text-xl font-black tracking-tight text-sky-500">BODY</span>
             </div>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-sm">
-                <Crown className="w-4 h-4 text-yellow-500" />
-                <span className="font-medium">Premium</span>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-100 rounded-full">
+                <Crown className="w-4 h-4 text-amber-600" />
+                <span className="text-sm font-bold text-amber-700">Premium</span>
               </div>
-              <Button variant="ghost" size="icon">
-                <LogOut className="w-5 h-5" />
-              </Button>
+              <button className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition-colors">
+                <LogOut className="w-5 h-5 text-slate-600" />
+              </button>
             </div>
           </div>
         </div>
       </header>
 
       {/* Content */}
-      <main className="container max-w-6xl mx-auto px-4 py-8">
+      <main className="max-w-6xl mx-auto px-4 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mb-2">
             Welcome back! 👋
           </h1>
-          <p className="text-muted-foreground">
-            Here&apos;s your personalized PCOS meal plan for this week.
+          <p className="text-slate-500">
+            {gender === "male" 
+              ? "Here's your personalized fitness meal plan for this week."
+              : "Here's your personalized wellness meal plan for this week."}
           </p>
+        </div>
+
+        {/* Stats Overview */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                <Flame className="w-5 h-5 text-amber-600" />
+              </div>
+            </div>
+            <div className="text-2xl font-black text-slate-900">{dailyTotals.calories}</div>
+            <div className="text-xs text-slate-500 font-medium">Daily Calories</div>
+          </div>
+          <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 bg-sky-100 rounded-xl flex items-center justify-center">
+                <Dumbbell className="w-5 h-5 text-sky-600" />
+              </div>
+            </div>
+            <div className="text-2xl font-black text-slate-900">{dailyTotals.protein}g</div>
+            <div className="text-xs text-slate-500 font-medium">Daily Protein</div>
+          </div>
+          <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                <Apple className="w-5 h-5 text-emerald-600" />
+              </div>
+            </div>
+            <div className="text-2xl font-black text-slate-900">4</div>
+            <div className="text-xs text-slate-500 font-medium">Meals Today</div>
+          </div>
+          <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                <Calendar className="w-5 h-5 text-purple-600" />
+              </div>
+            </div>
+            <div className="text-2xl font-black text-slate-900">7</div>
+            <div className="text-xs text-slate-500 font-medium">Days Planned</div>
+          </div>
         </div>
 
         {/* Quick Actions */}
         <div className="grid sm:grid-cols-3 gap-4 mb-8">
-          <Card className="cursor-pointer hover:border-primary/50 transition-colors">
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                <ChefHat className="w-6 h-6 text-primary" />
+          <button className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all text-left group">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-sky-100 to-emerald-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                <ChefHat className="w-6 h-6 text-slate-700" />
               </div>
               <div>
-                <h3 className="font-semibold">Today&apos;s Meals</h3>
-                <p className="text-sm text-muted-foreground">View today&apos;s plan</p>
+                <h3 className="font-bold text-slate-900">Today's Meals</h3>
+                <p className="text-sm text-slate-500">View today's plan</p>
               </div>
-            </CardContent>
-          </Card>
-          <Card className="cursor-pointer hover:border-primary/50 transition-colors">
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                <ShoppingCart className="w-6 h-6 text-primary" />
+            </div>
+          </button>
+          <button className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all text-left group">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-amber-100 to-orange-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                <ShoppingCart className="w-6 h-6 text-slate-700" />
               </div>
               <div>
-                <h3 className="font-semibold">Shopping List</h3>
-                <p className="text-sm text-muted-foreground">Get ingredients</p>
+                <h3 className="font-bold text-slate-900">Shopping List</h3>
+                <p className="text-sm text-slate-500">Get ingredients</p>
               </div>
-            </CardContent>
-          </Card>
-          <Card
-            className="cursor-pointer hover:border-primary/50 transition-colors"
+            </div>
+          </button>
+          <button
             onClick={generateNewPlan}
+            disabled={isGenerating}
+            className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all text-left group disabled:opacity-50"
           >
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                <RefreshCw
-                  className={`w-6 h-6 text-primary ${isGenerating ? "animate-spin" : ""}`}
-                />
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                <RefreshCw className={`w-6 h-6 text-slate-700 ${isGenerating ? "animate-spin" : ""}`} />
               </div>
               <div>
-                <h3 className="font-semibold">New Plan</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="font-bold text-slate-900">New Plan</h3>
+                <p className="text-sm text-slate-500">
                   {isGenerating ? "Generating..." : "Generate new plan"}
                 </p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </button>
         </div>
 
         {/* Day Selector */}
         <div className="flex gap-2 overflow-x-auto pb-4 mb-6">
           {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day, index) => (
-            <Button
+            <button
               key={day}
-              variant={selectedDay === index ? "default" : "outline"}
-              className="min-w-[60px]"
               onClick={() => setSelectedDay(index)}
               disabled={!mealPlan?.days[index]}
+              className={`min-w-[60px] px-4 py-3 rounded-xl font-bold text-sm transition-all ${
+                selectedDay === index
+                  ? "bg-slate-900 text-white shadow-lg"
+                  : "bg-white text-slate-700 border border-slate-200 hover:border-slate-300"
+              } disabled:opacity-50`}
             >
               {day}
-            </Button>
+            </button>
           ))}
         </div>
 
         {/* Meal Plan */}
         {currentDay ? (
           <div className="space-y-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Calendar className="w-5 h-5 text-primary" />
-              <h2 className="text-xl font-bold">{currentDay.day}</h2>
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-sky-500" />
+              <h2 className="text-xl font-black text-slate-900">{currentDay.day}</h2>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Breakfast */}
-              <Card>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">🌅</span>
-                    <CardTitle className="text-lg">Breakfast</CardTitle>
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                <div className="h-2 bg-gradient-to-r from-amber-400 to-orange-400" />
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-3xl">🌅</span>
+                    <h3 className="text-lg font-bold text-slate-900">Breakfast</h3>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <h3 className="font-semibold mb-1">{currentDay.breakfast.name}</h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    {currentDay.breakfast.description}
-                  </p>
-                  <div className="flex gap-3 text-xs">
-                    <span className="px-2 py-1 bg-muted rounded">
+                  <h4 className="font-bold text-slate-800 mb-2">{currentDay.breakfast.name}</h4>
+                  <p className="text-sm text-slate-500 mb-4">{currentDay.breakfast.description}</p>
+                  <div className="flex gap-2">
+                    <span className="px-3 py-1.5 bg-slate-100 rounded-full text-xs font-bold text-slate-600">
                       {currentDay.breakfast.calories} cal
                     </span>
-                    <span className="px-2 py-1 bg-muted rounded">
+                    <span className="px-3 py-1.5 bg-sky-100 rounded-full text-xs font-bold text-sky-600">
                       {currentDay.breakfast.protein}g protein
                     </span>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Lunch */}
-              <Card>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">☀️</span>
-                    <CardTitle className="text-lg">Lunch</CardTitle>
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                <div className="h-2 bg-gradient-to-r from-sky-400 to-cyan-400" />
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-3xl">☀️</span>
+                    <h3 className="text-lg font-bold text-slate-900">Lunch</h3>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <h3 className="font-semibold mb-1">{currentDay.lunch.name}</h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    {currentDay.lunch.description}
-                  </p>
-                  <div className="flex gap-3 text-xs">
-                    <span className="px-2 py-1 bg-muted rounded">
+                  <h4 className="font-bold text-slate-800 mb-2">{currentDay.lunch.name}</h4>
+                  <p className="text-sm text-slate-500 mb-4">{currentDay.lunch.description}</p>
+                  <div className="flex gap-2">
+                    <span className="px-3 py-1.5 bg-slate-100 rounded-full text-xs font-bold text-slate-600">
                       {currentDay.lunch.calories} cal
                     </span>
-                    <span className="px-2 py-1 bg-muted rounded">
+                    <span className="px-3 py-1.5 bg-sky-100 rounded-full text-xs font-bold text-sky-600">
                       {currentDay.lunch.protein}g protein
                     </span>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Dinner */}
-              <Card>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">🌙</span>
-                    <CardTitle className="text-lg">Dinner</CardTitle>
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                <div className="h-2 bg-gradient-to-r from-indigo-400 to-purple-400" />
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-3xl">🌙</span>
+                    <h3 className="text-lg font-bold text-slate-900">Dinner</h3>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <h3 className="font-semibold mb-1">{currentDay.dinner.name}</h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    {currentDay.dinner.description}
-                  </p>
-                  <div className="flex gap-3 text-xs">
-                    <span className="px-2 py-1 bg-muted rounded">
+                  <h4 className="font-bold text-slate-800 mb-2">{currentDay.dinner.name}</h4>
+                  <p className="text-sm text-slate-500 mb-4">{currentDay.dinner.description}</p>
+                  <div className="flex gap-2">
+                    <span className="px-3 py-1.5 bg-slate-100 rounded-full text-xs font-bold text-slate-600">
                       {currentDay.dinner.calories} cal
                     </span>
-                    <span className="px-2 py-1 bg-muted rounded">
+                    <span className="px-3 py-1.5 bg-sky-100 rounded-full text-xs font-bold text-sky-600">
                       {currentDay.dinner.protein}g protein
                     </span>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
 
             {/* Snacks */}
             {currentDay.snacks && currentDay.snacks.length > 0 && (
-              <Card>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center gap-2">
-                    <Utensils className="w-5 h-5 text-primary" />
-                    <CardTitle className="text-lg">Snacks</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-4">
-                    {currentDay.snacks.map((snack, index) => (
-                      <div key={index} className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                        <div>
-                          <h4 className="font-medium">{snack.name}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            {snack.calories} cal
-                          </p>
-                        </div>
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <Utensils className="w-5 h-5 text-emerald-500" />
+                  <h3 className="text-lg font-bold text-slate-900">Snacks</h3>
+                </div>
+                <div className="flex flex-wrap gap-4">
+                  {currentDay.snacks.map((snack, index) => (
+                    <div key={index} className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl">
+                      <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-xl">
+                        🥜
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                      <div>
+                        <h4 className="font-bold text-slate-800">{snack.name}</h4>
+                        <p className="text-sm text-slate-500">{snack.calories} cal</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         ) : (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <ChefHat className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-semibold mb-2">No Meal Plan Yet</h3>
-              <p className="text-muted-foreground mb-4">
-                Click &quot;Generate New Plan&quot; to create your personalized PCOS-friendly meal plan.
-              </p>
-              <Button onClick={generateNewPlan} disabled={isGenerating}>
-                {isGenerating ? "Generating..." : "Generate Plan"}
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-12 text-center">
+            <ChefHat className="w-16 h-16 mx-auto mb-4 text-slate-300" />
+            <h3 className="text-xl font-bold text-slate-900 mb-2">No Meal Plan Yet</h3>
+            <p className="text-slate-500 mb-6">
+              Click "Generate New Plan" to create your personalized meal plan.
+            </p>
+            <button
+              onClick={generateNewPlan}
+              disabled={isGenerating}
+              className="px-8 py-3 bg-slate-900 text-white font-bold rounded-full hover:bg-slate-800 transition-colors disabled:opacity-50"
+            >
+              {isGenerating ? "Generating..." : "Generate Plan"}
+            </button>
+          </div>
         )}
       </main>
 
       {/* Footer */}
-      <footer className="border-t py-6 mt-8">
-        <div className="container max-w-6xl mx-auto px-4 text-center text-sm text-muted-foreground">
+      <footer className="border-t border-slate-200 bg-white py-6 mt-8">
+        <div className="max-w-6xl mx-auto px-4 text-center text-sm text-slate-500">
           <p>
             Need help?{" "}
-            <Link href="#" className="text-primary hover:underline">
+            <Link href="#" className="text-sky-600 font-medium hover:underline">
               Contact support
             </Link>
           </p>

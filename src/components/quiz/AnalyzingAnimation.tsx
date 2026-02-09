@@ -3,20 +3,50 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
+import { useQuizStore } from "@/hooks/useQuizState";
+import { generateAnalysis } from "@/lib/actions/generate-analysis";
 
-const analysisSteps = [
+const femaleAnalysisSteps = [
   { id: "bmi", label: "Calculating BMI" },
   { id: "metabolic", label: "Analyzing metabolic rate" },
   { id: "hormones", label: "Evaluating hormone profile" },
-  { id: "plan", label: "Building your plan" },
+  { id: "plan", label: "Building your PCOS plan" },
+];
+
+const maleAnalysisSteps = [
+  { id: "bmi", label: "Calculating BMI" },
+  { id: "metabolic", label: "Analyzing metabolic rate" },
+  { id: "fitness", label: "Evaluating fitness profile" },
+  { id: "plan", label: "Building your fitness plan" },
 ];
 
 export function AnalyzingAnimation() {
   const router = useRouter();
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
+  const { sessionId, getUserProfile, gender } = useQuizStore();
+  
+  const analysisSteps = gender === "male" ? maleAnalysisSteps : femaleAnalysisSteps;
 
   useEffect(() => {
+    // Trigger AI analysis generation in the background
+    const triggerAnalysis = async () => {
+      const profile = getUserProfile();
+      
+      if (profile && sessionId) {
+        try {
+          console.log("Triggering AI analysis generation...");
+          await generateAnalysis(sessionId, profile);
+          console.log("AI analysis generation completed");
+        } catch (error) {
+          console.error("Failed to generate AI analysis:", error);
+          // Fallback is handled in the generateAnalysis function
+        }
+      }
+    };
+
+    triggerAnalysis();
+
     // 5-second animation
     const duration = 5000;
     const interval = 50;
@@ -47,34 +77,34 @@ export function AnalyzingAnimation() {
     }, interval);
 
     return () => clearInterval(timer);
-  }, [router]);
+  }, [router, sessionId, getUserProfile]);
 
   return (
     <div className="flex flex-col items-center justify-center px-6 py-12 text-center max-w-md mx-auto">
       {/* Animated rings */}
       <div className="relative mb-12">
-        <div className="w-32 h-32 rounded-full border-4 border-muted flex items-center justify-center">
+        <div className="w-32 h-32 rounded-full border-4 border-slate-200 flex items-center justify-center bg-white shadow-xl">
           <div 
-            className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin"
+            className="absolute inset-0 rounded-full border-4 border-slate-900 border-t-transparent animate-spin"
             style={{ animationDuration: "1.5s" }}
           />
           <div 
-            className="absolute inset-2 rounded-full border-4 border-accent/50 border-b-transparent animate-spin"
+            className="absolute inset-2 rounded-full border-4 border-sky-400/50 border-b-transparent animate-spin"
             style={{ animationDuration: "2s", animationDirection: "reverse" }}
           />
-          <span className="font-display text-3xl font-bold tabular-nums">
+          <span className="text-3xl font-black tabular-nums text-slate-900">
             {Math.round(progress)}%
           </span>
         </div>
         {/* Glow effect */}
-        <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl -z-10 animate-pulse" />
+        <div className="absolute inset-0 bg-sky-400/20 rounded-full blur-2xl -z-10 animate-pulse" />
       </div>
 
       {/* Status text */}
-      <h2 className="font-display text-2xl sm:text-3xl font-semibold mb-2">
+      <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mb-2">
         Analyzing your answers
       </h2>
-      <p className="text-muted-foreground mb-10">
+      <p className="text-slate-500 mb-10">
         Creating your personalized plan...
       </p>
 
@@ -89,39 +119,39 @@ export function AnalyzingAnimation() {
               key={step.id}
               className={`flex items-center gap-4 p-4 rounded-2xl transition-all duration-500 ${
                 isComplete
-                  ? "bg-accent/10 border border-accent/20"
+                  ? "bg-emerald-50 border border-emerald-200"
                   : isActive
-                  ? "bg-primary/10 border border-primary/20"
-                  : "bg-muted/50 border border-transparent"
+                  ? "bg-white border border-slate-200 shadow-md"
+                  : "bg-slate-100 border border-transparent"
               }`}
             >
               <div
                 className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-300 ${
                   isComplete
-                    ? "bg-accent text-accent-foreground"
+                    ? "bg-emerald-500 text-white"
                     : isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground"
+                    ? "bg-slate-900 text-white"
+                    : "bg-slate-200 text-slate-400"
                 }`}
               >
                 {isComplete ? (
                   <Check className="w-5 h-5" strokeWidth={3} />
                 ) : (
-                  <span className="text-sm font-semibold">{index + 1}</span>
+                  <span className="text-sm font-bold">{index + 1}</span>
                 )}
               </div>
               <span
-                className={`font-medium transition-colors duration-300 ${
-                  isComplete || isActive ? "text-foreground" : "text-muted-foreground"
+                className={`font-bold transition-colors duration-300 ${
+                  isComplete ? "text-emerald-700" : isActive ? "text-slate-900" : "text-slate-400"
                 }`}
               >
                 {step.label}
               </span>
               {isActive && !isComplete && (
                 <div className="ml-auto flex gap-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: "0.2s" }} />
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: "0.4s" }} />
+                  <div className="w-1.5 h-1.5 rounded-full bg-slate-900 animate-pulse" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-slate-900 animate-pulse" style={{ animationDelay: "0.2s" }} />
+                  <div className="w-1.5 h-1.5 rounded-full bg-slate-900 animate-pulse" style={{ animationDelay: "0.4s" }} />
                 </div>
               )}
             </div>

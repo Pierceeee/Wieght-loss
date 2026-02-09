@@ -1,9 +1,38 @@
 import { createClient } from "@supabase/supabase-js";
 
+// Funnel submission status enum
+export type FunnelStatus = "started" | "completed" | "purchased";
+
 // Types for our database tables
 export interface Database {
   public: {
     Tables: {
+      funnel_submissions: {
+        Row: {
+          id: string;
+          created_at: string;
+          answers: Record<string, unknown>;
+          ai_analysis: string | null;
+          status: FunnelStatus;
+          email: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          answers: Record<string, unknown>;
+          ai_analysis?: string | null;
+          status?: FunnelStatus;
+          email?: string | null;
+        };
+        Update: {
+          id?: string;
+          created_at?: string;
+          answers?: Record<string, unknown>;
+          ai_analysis?: string | null;
+          status?: FunnelStatus;
+          email?: string | null;
+        };
+      };
       profiles: {
         Row: {
           id: string;
@@ -147,4 +176,61 @@ export function isSupabaseConfigured(): boolean {
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   );
+}
+
+// Helper functions for funnel_submissions table
+export async function createFunnelSubmission(
+  answers: Record<string, unknown>,
+  sessionId: string
+): Promise<Database["public"]["Tables"]["funnel_submissions"]["Row"]> {
+  const supabase = createServerClient();
+  
+  const { data, error } = await (supabase
+    .from("funnel_submissions") as any)
+    .insert({
+      id: sessionId,
+      answers,
+      status: "started" as FunnelStatus,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as Database["public"]["Tables"]["funnel_submissions"]["Row"];
+}
+
+export async function updateFunnelSubmission(
+  id: string,
+  updates: {
+    ai_analysis?: string;
+    status?: FunnelStatus;
+    email?: string;
+  }
+): Promise<Database["public"]["Tables"]["funnel_submissions"]["Row"]> {
+  const supabase = createServerClient();
+  
+  const { data, error } = await (supabase
+    .from("funnel_submissions") as any)
+    .update(updates)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as Database["public"]["Tables"]["funnel_submissions"]["Row"];
+}
+
+export async function getFunnelSubmission(
+  id: string
+): Promise<Database["public"]["Tables"]["funnel_submissions"]["Row"]> {
+  const supabase = createServerClient();
+  
+  const { data, error } = await (supabase
+    .from("funnel_submissions") as any)
+    .select()
+    .eq("id", id)
+    .single();
+
+  if (error) throw error;
+  return data as Database["public"]["Tables"]["funnel_submissions"]["Row"];
 }

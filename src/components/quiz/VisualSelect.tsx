@@ -20,12 +20,12 @@ export function VisualSelect({ options, value, onChange }: VisualSelectProps) {
             key={option.id}
             onClick={() => onChange(option.id)}
             className={cn(
-              "quiz-option relative flex flex-col items-center p-5 sm:p-6 rounded-3xl border-2 transition-all duration-200",
-              "hover:border-primary/50 hover:bg-primary/5",
+              "relative flex flex-col items-center p-5 sm:p-6 rounded-3xl border-2 transition-all duration-200",
+              "hover:border-slate-400 hover:bg-white hover:shadow-lg",
               "w-[120px] sm:w-[150px]",
               isSelected
-                ? "border-primary bg-primary/10 shadow-xl shadow-primary/15 scale-105"
-                : "border-border bg-card hover:shadow-lg"
+                ? "border-slate-900 bg-white shadow-xl scale-105"
+                : "border-slate-200 bg-white/80"
             )}
             style={{ animationDelay: `${index * 80}ms` }}
           >
@@ -34,11 +34,11 @@ export function VisualSelect({ options, value, onChange }: VisualSelectProps) {
               className={cn(
                 "absolute -top-2 -right-2 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-300",
                 isSelected
-                  ? "bg-primary scale-100 opacity-100"
-                  : "bg-muted scale-75 opacity-0"
+                  ? "bg-slate-900 scale-100 opacity-100"
+                  : "bg-slate-200 scale-75 opacity-0"
               )}
             >
-              <svg className="w-4 h-4 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
@@ -54,13 +54,13 @@ export function VisualSelect({ options, value, onChange }: VisualSelectProps) {
                 />
               </div>
             ) : (
-              <div className="w-16 h-28 sm:w-20 sm:h-36 mb-4 bg-gradient-to-b from-muted to-muted/50 rounded-2xl flex items-center justify-center">
+              <div className="w-16 h-28 sm:w-20 sm:h-36 mb-4 bg-gradient-to-b from-slate-100 to-slate-50 rounded-2xl flex items-center justify-center">
                 {/* Simple body silhouette based on option */}
                 <svg 
                   viewBox="0 0 40 80" 
                   className={cn(
                     "w-12 h-24 transition-colors",
-                    isSelected ? "text-primary" : "text-muted-foreground/50"
+                    isSelected ? "text-slate-900" : "text-slate-300"
                   )}
                   fill="currentColor"
                 >
@@ -87,8 +87,8 @@ export function VisualSelect({ options, value, onChange }: VisualSelectProps) {
             )}
 
             <span className={cn(
-              "font-semibold text-base transition-colors",
-              isSelected ? "text-primary" : "text-foreground"
+              "font-bold text-base transition-colors",
+              isSelected ? "text-slate-900" : "text-slate-600"
             )}>
               {option.label}
             </span>

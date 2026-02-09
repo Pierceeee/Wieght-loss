@@ -3,15 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useQuizStore } from "@/hooks/useQuizState";
 import { calculateBMI, getBMIResult, getHealthRisks } from "@/lib/bmi";
-import { Heart, AlertTriangle, CheckCircle, TrendingDown } from "lucide-react";
+import { ArrowRight, AlertTriangle, Activity, Flame, Droplets, Moon } from "lucide-react";
 
 export default function SummaryPage() {
   const router = useRouter();
-  const { getUserProfile } = useQuizStore();
+  const { getUserProfile, gender } = useQuizStore();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -20,8 +18,8 @@ export default function SummaryPage() {
 
   if (!isClient) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-[#f0f4f8]">
+        <div className="w-10 h-10 border-4 border-slate-300 border-t-slate-900 rounded-full animate-spin" />
       </div>
     );
   }
@@ -29,7 +27,7 @@ export default function SummaryPage() {
   const profile = getUserProfile();
   
   if (!profile) {
-    router.push("/quiz/1");
+    router.push("/");
     return null;
   }
 
@@ -39,117 +37,221 @@ export default function SummaryPage() {
 
   // Calculate gauge position (0-100)
   const gaugePosition = Math.min(Math.max((bmi - 15) / 25 * 100, 0), 100);
+  
+  // Get BMI color
+  const getBMIColor = (category: string) => {
+    switch (category) {
+      case "Underweight": return "#3b82f6";
+      case "Normal": return "#10b981";
+      case "Overweight": return "#f59e0b";
+      case "Obese": return "#ef4444";
+      default: return "#64748b";
+    }
+  };
+
+  const bmiColor = getBMIColor(bmiResult.category);
+
+  // Profile insights based on gender
+  const getActivityLabel = (level: string) => {
+    switch (level) {
+      case "desk-job": return { label: "Sedentary", desc: "Desk job lifestyle" };
+      case "moving-a-lot": return { label: "Active", desc: "On your feet often" };
+      case "always-working-out": return { label: "Very Active", desc: "Regular workouts" };
+      case "home": return { label: "Light", desc: "Home-based activity" };
+      default: return { label: "Moderate", desc: "Average activity" };
+    }
+  };
+
+  const getExerciseLabel = (pref: string) => {
+    switch (pref) {
+      case "regularly": return { label: "Regular", icon: "💪" };
+      case "occasionally": return { label: "Occasional", icon: "🏃" };
+      case "try-to-stay-active": return { label: "Light", icon: "🚶" };
+      default: return { label: "Getting Started", icon: "🌱" };
+    }
+  };
+
+  const activity = getActivityLabel(profile.activityLevel);
+  const exercise = getExerciseLabel(profile.exercisePreference);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#f0f4f8]">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="container max-w-2xl mx-auto px-4 py-4">
+      <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200/50">
+        <div className="max-w-2xl mx-auto px-4 py-4">
           <div className="flex items-center justify-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Heart className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold">PCOS Plan</span>
+            <span className="text-xl font-black tracking-tight text-slate-900">PERFECT</span>
+            <span className="text-xl font-black tracking-tight text-sky-500">BODY</span>
           </div>
         </div>
       </header>
 
       {/* Content */}
-      <main className="container max-w-2xl mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">
-            Your Personal Summary
+      <main className="max-w-2xl mx-auto px-4 py-8 sm:py-12">
+        <div className="text-center mb-10">
+          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 mb-3">
+            Your Health Profile
           </h1>
-          <p className="text-muted-foreground">
-            Based on your answers, here is your current health profile.
+          <p className="text-lg text-slate-500">
+            Based on your answers, here's your current status
           </p>
         </div>
 
-        {/* BMI Summary */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <h2 className="text-xl font-bold mb-4">BMI & Health Risks</h2>
+        {/* BMI Card */}
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm mb-6">
+          <h2 className="text-lg font-bold text-slate-900 mb-6">Body Mass Index</h2>
+          
+          {/* BMI Gauge */}
+          <div className="mb-8">
+            {/* Labels */}
+            <div className="flex justify-between text-xs font-medium text-slate-400 mb-2 px-1">
+              <span>Underweight</span>
+              <span>Normal</span>
+              <span>Overweight</span>
+              <span>Obese</span>
+            </div>
             
-            {/* BMI Gauge */}
-            <div className="mb-6">
-              <div className="flex justify-between text-sm text-muted-foreground mb-2">
-                <span>Underweight</span>
-                <span>Normal</span>
-                <span>Overweight</span>
-                <span>Obese</span>
+            {/* Gauge bar */}
+            <div className="relative h-3 rounded-full overflow-hidden mb-6">
+              <div className="absolute inset-0 flex">
+                <div className="flex-1 bg-blue-400" />
+                <div className="flex-1 bg-emerald-400" />
+                <div className="flex-1 bg-amber-400" />
+                <div className="flex-1 bg-red-400" />
               </div>
-              <div className="relative h-4 bg-gradient-to-r from-blue-400 via-green-400 via-yellow-400 to-red-500 rounded-full">
-                <div
-                  className="absolute top-1/2 -translate-y-1/2 w-4 h-6 bg-foreground rounded-sm"
-                  style={{ left: `calc(${gaugePosition}% - 8px)` }}
-                />
-              </div>
-              <div className="text-center mt-4">
-                <span className="text-3xl font-bold" style={{ color: bmiResult.color }}>
+              {/* Indicator */}
+              <div
+                className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-slate-900 rounded-full border-3 border-white shadow-lg transition-all duration-500"
+                style={{ left: `calc(${gaugePosition}% - 10px)` }}
+              />
+            </div>
+            
+            {/* BMI Value */}
+            <div className="text-center">
+              <div className="inline-flex items-baseline gap-2">
+                <span className="text-5xl font-black" style={{ color: bmiColor }}>
                   {bmi.toFixed(1)}
                 </span>
-                <span className="text-lg text-muted-foreground ml-2">BMI</span>
-                <p className="font-medium" style={{ color: bmiResult.color }}>
-                  {bmiResult.category}
-                </p>
+                <span className="text-xl font-bold text-slate-400">BMI</span>
+              </div>
+              <div 
+                className="mt-2 inline-block px-4 py-1.5 rounded-full text-sm font-bold"
+                style={{ 
+                  backgroundColor: `${bmiColor}15`,
+                  color: bmiColor 
+                }}
+              >
+                {bmiResult.category}
               </div>
             </div>
+          </div>
 
-            {/* Health Risks */}
-            {healthRisks.length > 0 && (
-              <div className="mb-6">
-                <h3 className="font-semibold mb-2 flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 text-yellow-500" />
-                  Risks of unhealthy BMI
-                </h3>
-                <ul className="space-y-1 text-sm text-muted-foreground">
-                  {healthRisks.map((risk, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />
-                      {risk}
-                    </li>
-                  ))}
-                </ul>
+          {/* Health Risks */}
+          {healthRisks.length > 0 && (
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <AlertTriangle className="w-5 h-5 text-amber-600" />
+                <span className="font-bold text-amber-800">Potential Health Risks</span>
               </div>
-            )}
-
-            {/* Profile Summary */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                <CheckCircle className="w-5 h-5 text-primary" />
-                <div>
-                  <span className="text-sm text-muted-foreground">PCOS SYMPTOMS: </span>
-                  <span className="font-medium">Present</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                <TrendingDown className="w-5 h-5 text-primary" />
-                <div>
-                  <span className="text-sm text-muted-foreground">EXERCISE: </span>
-                  <span className="font-medium">
-                    {profile.exercisePreference === "regularly" ? "Regular" : 
-                     profile.exercisePreference === "occasionally" ? "Occasional" : "Light"} exercise
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                <Heart className="w-5 h-5 text-primary" />
-                <div>
-                  <span className="text-sm text-muted-foreground">ACTIVITY LEVEL: </span>
-                  <span className="font-medium">
-                    {profile.activityLevel === "desk-job" ? "Low" :
-                     profile.activityLevel === "always-working-out" ? "High" : "Moderate"}
-                  </span>
-                </div>
-              </div>
+              <ul className="space-y-2">
+                {healthRisks.slice(0, 4).map((risk, index) => (
+                  <li key={index} className="flex items-center gap-2 text-sm text-amber-700">
+                    <span className="w-1.5 h-1.5 bg-amber-500 rounded-full flex-shrink-0" />
+                    {risk}
+                  </li>
+                ))}
+              </ul>
             </div>
-          </CardContent>
-        </Card>
+          )}
+        </div>
+
+        {/* Lifestyle Insights */}
+        <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm mb-6">
+          <h2 className="text-lg font-bold text-slate-900 mb-4">Your Lifestyle</h2>
+          
+          <div className="grid grid-cols-2 gap-3">
+            {/* Activity Level */}
+            <div className="bg-slate-50 rounded-2xl p-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-sky-100 rounded-xl flex items-center justify-center">
+                  <Activity className="w-5 h-5 text-sky-600" />
+                </div>
+                <span className="text-sm font-bold text-slate-700">Activity</span>
+              </div>
+              <div className="text-xl font-black text-slate-900">{activity.label}</div>
+              <div className="text-xs text-slate-500">{activity.desc}</div>
+            </div>
+            
+            {/* Exercise */}
+            <div className="bg-slate-50 rounded-2xl p-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-lg">
+                  {exercise.icon}
+                </div>
+                <span className="text-sm font-bold text-slate-700">Exercise</span>
+              </div>
+              <div className="text-xl font-black text-slate-900">{exercise.label}</div>
+              <div className="text-xs text-slate-500">Workout frequency</div>
+            </div>
+            
+            {/* Hydration */}
+            <div className="bg-slate-50 rounded-2xl p-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <Droplets className="w-5 h-5 text-blue-600" />
+                </div>
+                <span className="text-sm font-bold text-slate-700">Hydration</span>
+              </div>
+              <div className="text-xl font-black text-slate-900">
+                {profile.hydration === "7-10-glasses" ? "Good" :
+                 profile.hydration === "2-6-glasses" ? "Moderate" : "Low"}
+              </div>
+              <div className="text-xs text-slate-500">Water intake</div>
+            </div>
+            
+            {/* Energy */}
+            <div className="bg-slate-50 rounded-2xl p-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                  <Flame className="w-5 h-5 text-amber-600" />
+                </div>
+                <span className="text-sm font-bold text-slate-700">Energy</span>
+              </div>
+              <div className="text-xl font-black text-slate-900">
+                {profile.energyLevels === "fine" ? "Good" :
+                 profile.energyLevels === "inconsistent" ? "Variable" : "Low"}
+              </div>
+              <div className="text-xs text-slate-500">Energy levels</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Goals Summary */}
+        <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm mb-8">
+          <h2 className="text-lg font-bold text-slate-900 mb-4">Your Goals</h2>
+          <div className="flex flex-wrap gap-2">
+            {profile.goals.map((goal, index) => (
+              <span 
+                key={index}
+                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-full text-sm font-medium"
+              >
+                {goal.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
+              </span>
+            ))}
+          </div>
+        </div>
 
         {/* CTA */}
-        <Button asChild className="w-full h-14 text-lg" size="lg">
-          <Link href="/email">Continue</Link>
-        </Button>
+        <Link
+          href="/email"
+          className="flex items-center justify-center gap-2 w-full h-14 sm:h-16 text-base sm:text-lg font-bold rounded-full
+                   bg-slate-900 text-white
+                   hover:bg-slate-800 hover:shadow-xl hover:shadow-slate-900/20 hover:-translate-y-0.5
+                   transition-all duration-200 group"
+        >
+          Continue
+          <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+        </Link>
       </main>
     </div>
   );

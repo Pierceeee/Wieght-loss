@@ -6,7 +6,9 @@ import { v4 as uuidv4 } from "uuid";
 import { QuizState, UserProfile } from "@/types/quiz";
 
 interface QuizStore extends QuizState {
+  gender: "male" | "female" | null;
   // Actions
+  setGender: (gender: "male" | "female") => void;
   setResponse: (questionId: string, value: string | string[] | number) => void;
   setCurrentStep: (step: number) => void;
   nextStep: () => void;
@@ -28,6 +30,9 @@ export const useQuizStore = create<QuizStore>()(
     (set, get) => ({
       ...initialState,
       sessionId: typeof window !== "undefined" ? uuidv4() : "",
+      gender: null,
+
+      setGender: (gender) => set({ gender }),
 
       setResponse: (questionId, value) =>
         set((state) => ({
@@ -55,7 +60,7 @@ export const useQuizStore = create<QuizStore>()(
       getResponse: (questionId) => get().responses[questionId],
 
       getUserProfile: () => {
-        const { responses } = get();
+        const { responses, gender } = get();
         
         // Check if we have enough data
         if (!responses["age"] || !responses["current-weight"] || !responses["height"]) {
@@ -63,6 +68,7 @@ export const useQuizStore = create<QuizStore>()(
         }
 
         return {
+          gender: gender || "female",
           age: responses["age"] as number,
           height: responses["height"] as number,
           currentWeight: responses["current-weight"] as number,
@@ -78,14 +84,16 @@ export const useQuizStore = create<QuizStore>()(
           moodIssues: (responses["mood-issues"] as string) || "",
           weightLossHistory: (responses["weight-loss-history"] as string) || "",
           energyLevels: (responses["energy-levels"] as string) || "",
+          fitnessLevel: (responses["fitness-level"] as string) || "",
         };
       },
 
       isComplete: () => {
-        const { responses } = get();
-        const requiredFields = [
+        const { responses, gender } = get();
+        
+        // Common required fields for both genders
+        const commonFields = [
           "symptoms",
-          "period-regularity",
           "mood-issues",
           "weight-loss-history",
           "energy-levels",
@@ -100,6 +108,13 @@ export const useQuizStore = create<QuizStore>()(
           "hydration",
           "bad-habits",
         ];
+        
+        // Gender-specific required fields
+        const genderFields = gender === "male" 
+          ? ["fitness-level"] 
+          : ["period-regularity"];
+        
+        const requiredFields = [...commonFields, ...genderFields];
         return requiredFields.every((field) => responses[field] !== undefined);
       },
     }),

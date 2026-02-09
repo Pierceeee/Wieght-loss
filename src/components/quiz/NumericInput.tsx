@@ -63,16 +63,16 @@ export function NumericInput({
     <div className="flex flex-col items-center gap-8 w-full py-8">
       {/* Unit selector */}
       {unitOptions && unitOptions.length > 1 && (
-        <div className="flex gap-2 p-1.5 bg-muted rounded-2xl">
+        <div className="flex gap-2 p-1.5 bg-slate-200 rounded-full">
           {unitOptions.map((u) => (
             <button
               key={u}
               onClick={() => setSelectedUnit(u)}
               className={cn(
-                "px-6 py-3 rounded-xl font-semibold text-base transition-all duration-200",
+                "px-6 py-3 rounded-full font-bold text-base transition-all duration-200",
                 selectedUnit === u
-                  ? "bg-primary text-primary-foreground shadow-md"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "bg-slate-900 text-white shadow-md"
+                  : "text-slate-500 hover:text-slate-900"
               )}
             >
               {u}
@@ -85,8 +85,8 @@ export function NumericInput({
       <div className="flex items-center gap-6">
         <button
           className={cn(
-            "w-16 h-16 rounded-2xl border-2 border-border bg-card flex items-center justify-center text-3xl font-semibold transition-all duration-200",
-            "hover:border-primary/50 hover:bg-primary/5 active:scale-95",
+            "w-16 h-16 rounded-full border-2 border-slate-200 bg-white flex items-center justify-center text-3xl font-bold text-slate-900 transition-all duration-200",
+            "hover:border-slate-400 hover:bg-slate-50 active:scale-95",
             (value || 0) <= min && "opacity-40 cursor-not-allowed"
           )}
           onClick={handleDecrement}
@@ -102,8 +102,8 @@ export function NumericInput({
             onChange={handleChange}
             placeholder={placeholder}
             className={cn(
-              "w-40 h-24 text-center font-display text-5xl sm:text-6xl font-semibold bg-transparent",
-              "border-2 border-border rounded-2xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20",
+              "w-40 h-24 text-center text-5xl sm:text-6xl font-black text-slate-900 bg-white",
+              "border-2 border-slate-200 rounded-2xl focus:outline-none focus:border-slate-900 focus:ring-4 focus:ring-slate-900/10",
               "transition-all duration-200",
               "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             )}
@@ -111,7 +111,7 @@ export function NumericInput({
             max={max}
           />
           {selectedUnit && (
-            <span className="absolute -right-12 top-1/2 -translate-y-1/2 text-xl font-medium text-muted-foreground">
+            <span className="absolute -right-12 top-1/2 -translate-y-1/2 text-xl font-bold text-slate-400">
               {selectedUnit}
             </span>
           )}
@@ -119,8 +119,8 @@ export function NumericInput({
 
         <button
           className={cn(
-            "w-16 h-16 rounded-2xl border-2 border-border bg-card flex items-center justify-center text-3xl font-semibold transition-all duration-200",
-            "hover:border-primary/50 hover:bg-primary/5 active:scale-95",
+            "w-16 h-16 rounded-full border-2 border-slate-200 bg-white flex items-center justify-center text-3xl font-bold text-slate-900 transition-all duration-200",
+            "hover:border-slate-400 hover:bg-slate-50 active:scale-95",
             (value || 0) >= max && "opacity-40 cursor-not-allowed"
           )}
           onClick={handleIncrement}
@@ -131,7 +131,7 @@ export function NumericInput({
       </div>
 
       {/* Range indicator */}
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-slate-400">
         Enter a value between {min} and {max}
       </p>
     </div>

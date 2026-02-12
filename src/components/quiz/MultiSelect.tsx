@@ -2,6 +2,7 @@
 
 import { QuizOption } from "@/types/quiz";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface MultiSelectProps {
   options: QuizOption[];
@@ -31,34 +32,48 @@ export function MultiSelect({ options, value = [], onChange }: MultiSelectProps)
     <div className="grid grid-cols-1 gap-3 w-full">
       {options.map((option, index) => {
         const isSelected = value.includes(option.id);
+        const isNoneOption = option.id === "none";
         return (
-          <button
-            key={option.id}
-            onClick={() => handleToggle(option.id)}
-            className={cn(
-              "flex items-center gap-3 p-3 rounded-md border transition-all duration-200 text-left active:scale-[0.98]",
-              "hover:border-slate-400 hover:bg-white",
-              isSelected
-                ? "border-amber-500 bg-amber-50 shadow-sm shadow-amber-200/60 scale-[1.005]"
-                : "border-slate-200 bg-white"
+          <div key={option.id}>
+            {isNoneOption && (
+              <div className="h-px bg-gray-200 my-3" />
             )}
-            style={{ animationDelay: `${index * 30}ms` }}
-          >
-            {option.icon && (
-              <span className="text-base flex-shrink-0">{option.icon}</span>
-            )}
-            <span className="flex-1 font-semibold text-sm text-slate-900">{option.label}</span>
-            <div
+            <button
+              onClick={() => handleToggle(option.id)}
               className={cn(
-                "w-4 h-4 rounded-full border flex items-center justify-center transition-all flex-shrink-0",
+                "flex items-center gap-3 p-4 rounded-xl border transition-all duration-200 text-left active:scale-[0.98] w-full",
+                "hover:border-gray-300 hover:shadow-sm",
                 isSelected
-                  ? "border-amber-600 bg-amber-500"
-                  : "border-slate-400"
+                  ? "border-gray-300 bg-white shadow-sm"
+                  : "border-gray-200 bg-white"
               )}
+              style={{ animationDelay: `${index * 30}ms` }}
             >
-              {isSelected && <span className="block w-1.5 h-1.5 rounded-full bg-white" />}
-            </div>
-          </button>
+              {option.image ? (
+                <div className="w-8 h-8 relative flex-shrink-0">
+                  <Image
+                    src={option.image}
+                    alt={option.label}
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+              ) : option.icon ? (
+                <span className="text-xl flex-shrink-0">{option.icon}</span>
+              ) : null}
+              <span className="flex-1 font-medium text-[15px] text-gray-900">{option.label}</span>
+              <div
+                className={cn(
+                  "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0",
+                  isSelected
+                    ? "border-gray-400 bg-white"
+                    : "border-gray-300 bg-white"
+                )}
+              >
+                {isSelected && <span className="block w-2.5 h-2.5 rounded-full bg-gray-800" />}
+              </div>
+            </button>
+          </div>
         );
       })}
     </div>

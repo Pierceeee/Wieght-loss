@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useQuizStore } from "@/hooks/useQuizState";
 import { completeFunnelWithEmail } from "@/lib/actions/submit-quiz";
-import { Lock } from "lucide-react";
+import { Heart, Lock } from "lucide-react";
 import { kgToLbs } from "@/lib/bmi";
 
 export default function EmailCapturePage() {
@@ -17,7 +17,7 @@ export default function EmailCapturePage() {
   const [error, setError] = useState("");
 
   const targetWeightLbs = (responses["target-weight-lbs"] as number | undefined) ||
-    Math.round(kgToLbs((responses["target-weight"] as number | undefined) || 45));
+    (responses["target-weight"] ? Math.round(kgToLbs(responses["target-weight"] as number)) : 120);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,24 +58,33 @@ export default function EmailCapturePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#eaecf0]">
-      <header className="bg-white border-b border-slate-200">
-        <div className="max-w-2xl mx-auto px-4 py-3 text-center">
-          <p className="font-bold text-3xl text-slate-900">PCOS Plan</p>
+    <div className="min-h-screen bg-[#F5F5F5]">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-100">
+        <div className="h-1 bg-[#ffd4b3]">
+          <div className="h-full bg-[#F4A460]" style={{ width: "100%" }} />
+        </div>
+        <div className="px-4 py-3 flex items-center justify-center gap-2">
+          <div className="bg-[#F4A460] p-1 rounded-md">
+            <Heart className="w-[18px] h-[18px] text-white fill-current" />
+          </div>
+          <span className="font-bold text-xl text-gray-800">PCOS Plan</span>
         </div>
       </header>
 
       <main className="max-w-md mx-auto px-4 py-10">
         <div className="text-center mb-8">
-          <h1 className="text-[42px] leading-tight font-extrabold text-slate-900">
+          <h1 className="text-2xl leading-snug font-bold text-gray-900">
             Enter your email to see how you can reach{" "}
-            <span className="text-amber-600">{targetWeightLbs} lbs</span> and alleviate PCOS symptoms
+            <span className="text-[#E8924D]">{targetWeightLbs} lbs</span>
+            <br />
+            and alleviate PCOS symptoms
           </h1>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
-            <label htmlFor="email" className="text-xs font-semibold text-slate-700">
+            <label htmlFor="email" className="text-sm font-semibold text-gray-800">
               Your email
             </label>
             <input
@@ -85,12 +94,12 @@ export default function EmailCapturePage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
-              className={`w-full h-12 px-3 rounded-md border bg-white text-slate-900 placeholder:text-slate-400 text-sm font-medium transition-colors ${error && !email ? "border-red-400" : "border-slate-300"}`}
+              className={`w-full h-12 px-4 rounded-xl border bg-white text-gray-900 placeholder:text-gray-400 text-sm transition-colors outline-none focus:border-gray-400 ${error && !email ? "border-red-400" : "border-gray-200"}`}
             />
           </div>
 
           <label className="flex items-start gap-3 cursor-pointer">
-            <div className="relative mt-0">
+            <div className="relative mt-0.5">
               <input
                 type="checkbox"
                 checked={agreed}
@@ -98,7 +107,7 @@ export default function EmailCapturePage() {
                 disabled={isLoading}
                 className="sr-only peer"
               />
-              <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${agreed ? "bg-slate-900 border-slate-900" : "bg-white border-slate-500"} ${error && !agreed ? "border-red-400" : ""}`}>
+              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${agreed ? "bg-gray-900 border-gray-900" : "bg-white border-gray-300"} ${error && !agreed ? "border-red-400" : ""}`}>
                 {agreed && (
                   <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                     <polyline points="20,6 9,17 4,12" />
@@ -106,9 +115,9 @@ export default function EmailCapturePage() {
                 )}
               </div>
             </div>
-            <span className="text-sm text-slate-700 leading-relaxed">
+            <span className="text-sm text-gray-700 leading-relaxed">
               I agree to the{" "}
-              <Link href="#" className="text-slate-800 font-medium hover:underline">
+              <Link href="#" className="text-gray-900 font-medium underline">
                 Privacy policy
               </Link>{" "}
               and receiving future information from PCOS Plan
@@ -116,7 +125,7 @@ export default function EmailCapturePage() {
           </label>
 
           {error && (
-            <div className="px-3 py-2 bg-red-50 border border-red-200 rounded text-sm text-red-600 font-medium">
+            <div className="px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 font-medium">
               {error}
             </div>
           )}
@@ -124,7 +133,7 @@ export default function EmailCapturePage() {
           <button
             type="submit"
             disabled={!email || !agreed || isLoading}
-            className="w-full h-12 text-sm font-semibold rounded-md bg-black text-white hover:bg-slate-900 disabled:bg-slate-300 disabled:text-white disabled:cursor-not-allowed"
+            className="w-full h-12 text-sm font-semibold rounded-xl bg-black text-white hover:bg-gray-900 disabled:bg-gray-300 disabled:text-white disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? (
               <div className="mx-auto w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -134,9 +143,9 @@ export default function EmailCapturePage() {
           </button>
         </form>
 
-        <div className="mt-6 flex items-start gap-2 text-xs text-slate-700">
-          <Lock className="w-4 h-4 mt-0.5 text-slate-500" />
-          <p>
+        <div className="mt-6 flex items-start gap-3 text-xs text-gray-600">
+          <Lock className="w-4 h-4 mt-0.5 text-gray-400 flex-shrink-0" />
+          <p className="leading-relaxed">
             We respect your privacy and use your email only to send you the PCOS Plan program and other important emails. You won&apos;t receive spam.
           </p>
         </div>

@@ -1,52 +1,216 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { Heart } from "lucide-react";
 
-const testimonials = [
-  "PCOS Plan is worth it. Straight forward, clean eating meal plans and shopping lists.",
-  "Lots of options to customize recipes and prep. Helpful for complex health concerns.",
-  "I've been using PCOS Plan for many years. Wonderful results and better energy.",
-  "I made real progress and got my confidence back.",
-  "The app gave me structure and support. Could not be happier.",
-  "It is a calm and practical system for everyday life.",
+const testimonialsRow1 = [
+  {
+    text: "PCOS Plan is worth it. Straight forward, clean eating meal plans and shopping lists. Blood results confirm I'm doing better.",
+    name: "Lucy T.",
+    stars: 5,
+  },
+  {
+    text: "Lots of options to customize recipes: foods you love/don't like, time to prepare, complexity, health concerns, so much more! Just about everything is perfect.",
+    name: "Emily S.",
+    stars: 5,
+  },
+  {
+    text: "I've been using PCOS Plan for many years. I was really overweight and now I'm back to 130lbs! It's wonderful, thank you. 😊😊🎉🙏",
+    name: "Caroline N.",
+    stars: 5,
+  },
+  {
+    text: "PCOS Plan is worth it. Straight forward, clean eating meal plans and shopping lists. Blood results confirm I'm doing better.",
+    name: "Lucy T.",
+    stars: 5,
+  },
+  {
+    text: "Lots of options to customize recipes: foods you love/don't like, time to prepare, complexity, health concerns, so much more! Just about everything is perfect.",
+    name: "Emily S.",
+    stars: 5,
+  },
+  {
+    text: "I've been using PCOS Plan for many years. I was really overweight and now I'm back to 130lbs! It's wonderful, thank you. 😊😊🎉🙏",
+    name: "Caroline N.",
+    stars: 5,
+  },
+];
+
+const testimonialsRow2 = [
+  {
+    text: "Healthy diets are a real thing! I quite literally lost over 40 lbs and I've never felt more beautiful 😊❤️ Love this thing!",
+    name: "Nicholas H.",
+    stars: 5,
+  },
+  {
+    text: "Honestly idk where id be if not for this. I quite literally lost over 40 lbs and I've never felt more beautiful 😊❤️ Love this thing!",
+    name: "Megan W.",
+    stars: 5,
+  },
+  {
+    text: "Couldn't do the exercises in the app due to my poor joints (too many years playing tennis) but the food is really good and I already notice my double chin becoming one again.",
+    name: "Laura G.",
+    stars: 5,
+  },
+  {
+    text: "A thing PB really gave me is a sense of community. People are active and the team is super helpful. This could be just what you need.",
+    name: "Sarah G.",
+    stars: 5,
+  },
+  {
+    text: "If you told me a month ago that I'd be 20 pounds lighter I would've called you a liar... but I'm proof this works!",
+    name: "Katherine B.",
+    stars: 5,
+  },
+  {
+    text: "If you need something to manage your weight in a safe way, this is the best option out there. I had been battling menopause weight gain for a while but look at me now!",
+    name: "Elizabeth M.",
+    stars: 5,
+  },
+  {
+    text: "I was skeptical because diets come and go, but this 😊🎉 plus it's cheap, can't complain.",
+    name: "",
+    stars: 5,
+  },
 ];
 
 export default function GeneratingPage() {
   const router = useRouter();
+  const [progress, setProgress] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      router.push("/email");
-    }, 2500);
+    intervalRef.current = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          return 100;
+        }
+        return prev + 1;
+      });
+    }, 60);
 
-    return () => clearTimeout(timeout);
-  }, [router]);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (progress >= 100) {
+      const timeout = setTimeout(() => {
+        router.push("/email");
+      }, 800);
+      return () => clearTimeout(timeout);
+    }
+  }, [progress, router]);
+
+  const circumference = 2 * Math.PI * 54;
+  const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   return (
-    <div className="min-h-screen bg-[#f2c7a4]">
-      <header className="bg-white px-4 py-3 text-center border-b border-slate-200">
-        <p className="font-bold text-2xl text-slate-900">PCOS Plan</p>
+    <div className="min-h-screen bg-[#FDDCB5] overflow-hidden">
+      {/* Header */}
+      <header className="bg-white px-4 py-3 border-b border-gray-100">
+        <div className="flex items-center justify-center gap-2">
+          <div className="bg-[#F4A460] p-1 rounded-md">
+            <Heart className="w-[18px] h-[18px] text-white fill-current" />
+          </div>
+          <span className="font-bold text-xl text-gray-800">PCOS Plan</span>
+        </div>
       </header>
 
-      <main className="py-12">
-        <div className="w-36 h-36 rounded-full border-4 border-amber-600 mx-auto flex items-center justify-center bg-[#f2c7a4]">
-          <span className="text-5xl font-bold text-slate-900">100%</span>
-        </div>
-        <p className="text-center mt-4 font-semibold text-slate-900">Calculating your results</p>
-
-        <h1 className="text-center mt-8 text-5xl font-extrabold text-slate-900">What our users are saying</h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-7xl mx-auto mt-8 px-3">
-          {testimonials.map((text, index) => (
-            <div key={index} className="rounded-md bg-white px-4 py-3 border border-[#f0d7c3]">
-              <p className="text-xs text-slate-700">{text}</p>
-              <p className="mt-2 text-amber-500">★★★★★</p>
+      <main className="py-10">
+        {/* Progress circle */}
+        <div className="flex flex-col items-center">
+          <div className="relative w-32 h-32">
+            <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
+              <circle
+                cx="60"
+                cy="60"
+                r="54"
+                fill="none"
+                stroke="rgba(255,255,255,0.4)"
+                strokeWidth="6"
+              />
+              <circle
+                cx="60"
+                cy="60"
+                r="54"
+                fill="none"
+                stroke="#E8924D"
+                strokeWidth="6"
+                strokeLinecap="round"
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeDashoffset}
+                className="transition-all duration-100 ease-linear"
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-4xl font-bold text-gray-900">{progress}%</span>
             </div>
-          ))}
+          </div>
+
+          <p className="text-center mt-4 text-sm font-medium text-gray-700">
+            Calculating your results
+          </p>
+        </div>
+
+        {/* Heading */}
+        <h1 className="text-center mt-8 text-3xl md:text-4xl font-extrabold text-gray-900">
+          What our users are saying
+        </h1>
+
+        {/* Testimonials Row 1 - scrolling left */}
+        <div className="mt-8 overflow-hidden">
+          <div className="flex gap-4 animate-scroll-left">
+            {[...testimonialsRow1, ...testimonialsRow1].map((t, i) => (
+              <div
+                key={i}
+                className="flex-shrink-0 w-64 rounded-xl bg-white p-4 border border-[#f0d7c3] shadow-sm"
+              >
+                <p className="text-xs text-gray-700 leading-relaxed line-clamp-4">
+                  {t.text}
+                </p>
+                <div className="flex items-center justify-between mt-3">
+                  <span className="text-xs font-semibold text-gray-800">{t.name}</span>
+                  <div className="flex gap-0.5">
+                    {Array.from({ length: t.stars }).map((_, j) => (
+                      <span key={j} className="text-amber-400 text-xs">★</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Testimonials Row 2 - scrolling right */}
+        <div className="mt-4 overflow-hidden">
+          <div className="flex gap-4 animate-scroll-right">
+            {[...testimonialsRow2, ...testimonialsRow2].map((t, i) => (
+              <div
+                key={i}
+                className="flex-shrink-0 w-64 rounded-xl bg-white p-4 border border-[#f0d7c3] shadow-sm"
+              >
+                <p className="text-xs text-gray-700 leading-relaxed line-clamp-4">
+                  {t.text}
+                </p>
+                <div className="flex items-center justify-between mt-3">
+                  {t.name && (
+                    <span className="text-xs font-semibold text-gray-800">{t.name}</span>
+                  )}
+                  <div className="flex gap-0.5 ml-auto">
+                    {Array.from({ length: t.stars }).map((_, j) => (
+                      <span key={j} className="text-amber-400 text-xs">★</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </main>
     </div>
   );
 }
-

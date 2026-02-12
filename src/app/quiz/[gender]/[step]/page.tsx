@@ -18,7 +18,7 @@ import { getQuestionByStep, getTotalSteps } from "@/lib/quiz-data";
 import { useQuizStore } from "@/hooks/useQuizState";
 import { startFunnelSubmission } from "@/lib/actions/submit-quiz";
 import { lbsToKg } from "@/lib/bmi";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Heart } from "lucide-react";
 
 export default function QuizStepPage() {
   const router = useRouter();
@@ -172,6 +172,7 @@ export default function QuizStepPage() {
             description={question.content.description}
             highlight={question.content.highlight}
             image={question.content.image}
+            benefits={question.benefits}
           />
         ) : null;
 
@@ -201,48 +202,76 @@ export default function QuizStepPage() {
   const showFooterButton = question.type !== "single-select" && question.type !== "visual-select";
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#eaecf0]">
-      {/* Header */}
-      <header className="flex-shrink-0">
-        <div className="h-1.5 bg-[#efc7aa]">
-          <div
-            className="h-full bg-[#c47e1b] transition-all duration-500"
-            style={{ width: `${(step / totalSteps) * 100}%` }}
-          />
-        </div>
-        <div className="relative px-4 py-3 bg-[#f4f5f7] border-b border-slate-200">
-          <button
-            onClick={handleBack}
-            className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-md border border-slate-300 bg-white hover:bg-slate-50"
-            aria-label="Go back"
-          >
-            <ArrowLeft className="w-4 h-4 text-slate-600" />
-          </button>
-          <div className="text-center">
-            <p className="font-bold text-3xl leading-none text-slate-900">PCOS Plan</p>
+    <div className={`min-h-screen flex flex-col ${question.id === "age-range" ? "bg-[#FFF0E0]" : "bg-[#F5F5F5]"}`}>
+      {/* Header - only show for non-age-range questions */}
+      {question.id !== "age-range" && (
+        <header className="flex-shrink-0">
+          <div className="h-1 bg-[#ffd4b3]">
+            <div
+              className="h-full bg-[#ff9933] transition-all duration-500"
+              style={{ width: `${((step - 1) / (totalSteps - 1)) * 100}%` }}
+            />
           </div>
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-600">
-            {step}/{totalSteps}
-          </span>
-        </div>
-      </header>
+          <div className="relative px-4 py-3 bg-white border-b border-gray-100">
+            <button
+              onClick={handleBack}
+              className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50"
+              aria-label="Go back"
+            >
+              <ArrowLeft className="w-4 h-4 text-gray-700" />
+            </button>
+            <div className="text-center flex items-center justify-center gap-2">
+              <div className="bg-[#F4A460] p-1 rounded-md">
+                <Heart className="w-[18px] h-[18px] text-white fill-current" />
+              </div>
+              <p className="font-bold text-xl text-gray-800">PCOS Plan</p>
+            </div>
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-gray-600">
+              {step - 1}/{totalSteps - 1}
+            </span>
+          </div>
+        </header>
+      )}
+
+      {/* Special header for age-range question */}
+      {question.id === "age-range" && (
+        <header className="w-full py-4 flex justify-center items-center bg-white border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <div className="bg-[#F4A460] p-1 rounded-md">
+              <Heart className="w-[18px] h-[18px] text-white fill-current" />
+            </div>
+            <span className="font-bold text-xl text-gray-800">PCOS Plan</span>
+          </div>
+        </header>
+      )}
 
       {/* Main content */}
       <main className="flex-1 flex flex-col">
         <div className="flex-1 overflow-y-auto px-4 pt-8 pb-4">
-          <div className="max-w-md mx-auto flex flex-col min-h-full">
-            {question.question && (
-              <div className="text-center mb-5">
-                <h1 className="text-[34px] leading-tight font-extrabold tracking-tight text-slate-900 mb-2">
+          <div className="max-w-md mx-auto flex flex-col min-h-full justify-center">
+            {question.question && question.id === "age-range" ? (
+              <div className="text-center mb-10">
+                <h1 className="text-5xl font-bold text-gray-900 mb-4">
                   {question.question}
                 </h1>
                 {question.subtitle && (
-                  <p className="text-slate-600 text-sm">
+                  <p className="text-lg text-gray-600 font-medium">
                     {question.subtitle}
                   </p>
                 )}
               </div>
-            )}
+            ) : question.question ? (
+              <div className="text-center mb-8">
+                <h1 className="text-2xl leading-snug font-bold text-gray-900 mb-2">
+                  {question.question}
+                </h1>
+                {question.subtitle && (
+                  <p className="text-gray-600 text-sm font-normal">
+                    {question.subtitle}
+                  </p>
+                )}
+              </div>
+            ) : null}
 
             <div className="flex-1">
               {renderQuestionContent()}
@@ -251,12 +280,12 @@ export default function QuizStepPage() {
         </div>
 
         {showFooterButton && (
-          <footer className="px-4 pb-4">
+          <footer className="px-4 pb-6 pt-8">
             <div className="max-w-md mx-auto">
               <button
                 onClick={handleNext}
                 disabled={!canContinue()}
-                className="w-full h-12 font-semibold rounded-md bg-black text-white hover:bg-slate-900 disabled:bg-slate-300 disabled:text-slate-100 disabled:cursor-not-allowed transition-colors"
+                className="w-full py-3 font-semibold text-base rounded-xl bg-black text-white hover:bg-gray-900 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
               >
                 Continue
               </button>

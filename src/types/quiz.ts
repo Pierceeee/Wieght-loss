@@ -32,6 +32,7 @@ export interface QuizQuestion {
     image?: string;
     highlight?: string;
   };
+  benefits?: string[];
   required?: boolean;
   validation?: {
     min?: number;

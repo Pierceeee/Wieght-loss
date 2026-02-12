@@ -33,18 +33,18 @@ export function NumericInput({
 
   return (
     <div className="max-w-md mx-auto">
-      <div className="relative h-16 rounded-md border border-slate-300 bg-white">
+      <div className="relative h-14 rounded-xl border border-gray-300 bg-white">
         <input
           type="number"
           value={inputValue}
           onChange={handleChange}
           placeholder={placeholder}
-          className="w-full h-full px-4 pr-12 text-center text-4xl font-bold text-slate-600 bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="w-full h-full px-4 pr-14 text-center text-3xl font-medium text-gray-700 bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           min={min}
           max={max}
         />
         {unit && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-800">
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-700">
             {unit}
           </span>
         )}

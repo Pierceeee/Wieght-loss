@@ -84,8 +84,6 @@ export default function QuizStepPage() {
   const handleBack = () => {
     if (step > 1) {
       router.push(`/quiz/${gender}/${step - 1}`);
-    } else {
-      router.push("/");
     }
   };
 
@@ -200,6 +198,8 @@ export default function QuizStepPage() {
   };
 
   const showFooterButton = question.type !== "single-select" && question.type !== "visual-select";
+  // For compact input types (height, numeric, visual-select), show the button inline below the content
+  const inlineButton = question.type === "height-input" || question.type === "numeric-input" || question.type === "visual-select";
 
   return (
     <div className={`min-h-screen flex flex-col ${question.id === "age-range" ? "bg-[#FFF0E0]" : "bg-[#F5F5F5]"}`}>
@@ -273,13 +273,27 @@ export default function QuizStepPage() {
               </div>
             ) : null}
 
-            <div className="flex-1">
+            <div className={inlineButton ? "" : "flex-1"}>
               {renderQuestionContent()}
             </div>
+
+            {/* Inline continue button — directly under the input box */}
+            {showFooterButton && inlineButton && (
+              <div className="mt-8 mb-4">
+                <button
+                  onClick={handleNext}
+                  disabled={!canContinue()}
+                  className="w-full py-3 font-semibold text-base rounded-xl bg-black text-white hover:bg-gray-900 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
+                >
+                  Continue
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
-        {showFooterButton && (
+        {/* Bottom-pinned continue button for other question types (multi-select, ingredient-select, etc.) */}
+        {showFooterButton && !inlineButton && (
           <footer className="px-4 pb-6 pt-8">
             <div className="max-w-md mx-auto">
               <button

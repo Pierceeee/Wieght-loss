@@ -80,6 +80,7 @@ export const useQuizStore = create<QuizStore>()(
           exercisePreference: (responses["exercise-preference"] as string) || "",
           hydration: (responses["hydration"] as string) || "",
           badHabits: (responses["bad-habits"] as string[]) || [],
+          ingredients: (responses["ingredients"] as string[]) || [],
           periodRegularity: (responses["period-regularity"] as string) || "",
           moodIssues: (responses["mood-issues"] as string) || "",
           weightLossHistory: (responses["weight-loss-history"] as string) || "",
@@ -115,7 +116,8 @@ export const useQuizStore = create<QuizStore>()(
           : ["period-regularity"];
         
         const requiredFields = [...commonFields, ...genderFields];
-        return requiredFields.every((field) => responses[field] !== undefined);
+        const extendedRequiredFields = [...requiredFields, "ingredients"];
+        return extendedRequiredFields.every((field) => responses[field] !== undefined);
       },
     }),
     {

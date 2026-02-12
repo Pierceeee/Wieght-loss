@@ -3,6 +3,7 @@
 import { QuizOption } from "@/types/quiz";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { ArrowRight } from "lucide-react";
 
 interface VisualSelectProps {
   options: QuizOption[];
@@ -12,7 +13,7 @@ interface VisualSelectProps {
 
 export function VisualSelect({ options, value, onChange }: VisualSelectProps) {
   return (
-    <div className="flex flex-wrap justify-center gap-4 sm:gap-6 w-full py-4">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full py-2">
       {options.map((option, index) => {
         const isSelected = value === option.id;
         return (
@@ -20,42 +21,25 @@ export function VisualSelect({ options, value, onChange }: VisualSelectProps) {
             key={option.id}
             onClick={() => onChange(option.id)}
             className={cn(
-              "relative flex flex-col items-center p-5 sm:p-6 rounded-3xl border-2 transition-all duration-200",
-              "hover:border-slate-400 hover:bg-white hover:shadow-lg",
-              "w-[120px] sm:w-[150px]",
+              "relative flex flex-col items-start rounded-md border transition-all duration-200 overflow-hidden active:scale-[0.98]",
+              "hover:border-slate-400 hover:bg-white",
               isSelected
-                ? "border-slate-900 bg-white shadow-xl scale-105"
-                : "border-slate-200 bg-white/80"
+                ? "border-amber-500 bg-amber-50 shadow-md shadow-amber-200/60 scale-[1.01] -translate-y-0.5"
+                : "border-slate-200 bg-white"
             )}
             style={{ animationDelay: `${index * 80}ms` }}
           >
-            {/* Selection indicator */}
-            <div
-              className={cn(
-                "absolute -top-2 -right-2 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-300",
-                isSelected
-                  ? "bg-slate-900 scale-100 opacity-100"
-                  : "bg-slate-200 scale-75 opacity-0"
-              )}
-            >
-              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-
-            {/* Body illustration */}
             {option.image ? (
-              <div className="relative w-16 h-28 sm:w-20 sm:h-36 mb-4">
+              <div className="relative w-full h-36">
                 <Image
                   src={option.image}
                   alt={option.label}
                   fill
-                  className="object-contain"
+                  className={cn("object-cover transition-transform duration-300", isSelected && "scale-105")}
                 />
               </div>
             ) : (
-              <div className="w-16 h-28 sm:w-20 sm:h-36 mb-4 bg-gradient-to-b from-slate-100 to-slate-50 rounded-2xl flex items-center justify-center">
-                {/* Simple body silhouette based on option */}
+              <div className="w-full h-36 bg-gradient-to-b from-slate-100 to-slate-50 flex items-center justify-center">
                 <svg 
                   viewBox="0 0 40 80" 
                   className={cn(
@@ -86,12 +70,15 @@ export function VisualSelect({ options, value, onChange }: VisualSelectProps) {
               </div>
             )}
 
-            <span className={cn(
-              "font-bold text-base transition-colors",
-              isSelected ? "text-slate-900" : "text-slate-600"
-            )}>
-              {option.label}
-            </span>
+            <div className="w-full px-3 py-2 flex items-center">
+              <span className={cn("font-semibold text-sm", isSelected ? "text-slate-900" : "text-slate-700")}>
+                {option.label}
+              </span>
+              <ArrowRight className={cn(
+                "w-4 h-4 ml-auto transition-transform duration-200",
+                isSelected ? "text-amber-600 translate-x-0.5" : "text-slate-500"
+              )} />
+            </div>
           </button>
         );
       })}

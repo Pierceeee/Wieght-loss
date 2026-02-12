@@ -2,6 +2,7 @@
 
 import { QuizOption } from "@/types/quiz";
 import { cn } from "@/lib/utils";
+import { ArrowRight } from "lucide-react";
 
 interface SingleSelectProps {
   options: QuizOption[];
@@ -19,30 +20,22 @@ export function SingleSelect({ options, value, onChange }: SingleSelectProps) {
             key={option.id}
             onClick={() => onChange(option.id)}
             className={cn(
-              "flex items-center gap-4 p-5 sm:p-6 rounded-2xl border-2 transition-all duration-200 text-left",
-              "hover:border-slate-400 hover:bg-white hover:shadow-md",
+              "flex items-center gap-3 p-4 rounded-md border transition-all duration-200 text-left active:scale-[0.98]",
+              "hover:border-slate-400 hover:bg-white",
               isSelected
-                ? "border-slate-900 bg-white shadow-lg"
-                : "border-slate-200 bg-white/80"
+                ? "border-amber-500 bg-amber-50 shadow-md shadow-amber-200/60 scale-[1.01] -translate-y-0.5"
+                : "border-slate-200 bg-white"
             )}
             style={{ animationDelay: `${index * 50}ms` }}
           >
             {option.icon && (
-              <span className="text-2xl flex-shrink-0">{option.icon}</span>
+              <span className="text-xl flex-shrink-0">{option.icon}</span>
             )}
-            <span className="flex-1 font-bold text-base sm:text-lg text-slate-900">{option.label}</span>
-            <div
-              className={cn(
-                "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0",
-                isSelected
-                  ? "border-slate-900 bg-slate-900"
-                  : "border-slate-300"
-              )}
-            >
-              {isSelected && (
-                <div className="w-2.5 h-2.5 rounded-full bg-white" />
-              )}
-            </div>
+            <span className="flex-1 font-semibold text-sm text-slate-900">{option.label}</span>
+            <ArrowRight className={cn(
+              "w-4 h-4 transition-transform duration-200",
+              isSelected ? "text-amber-600 translate-x-0.5" : "text-slate-500"
+            )} />
           </button>
         );
       })}

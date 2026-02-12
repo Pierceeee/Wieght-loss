@@ -2,6 +2,11 @@ export type QuestionType =
   | "single-select"
   | "multi-select"
   | "numeric-input"
+  | "height-input"
+  | "ingredient-select"
+  | "science-list"
+  | "goal-projection"
+  | "personal-summary"
   | "visual-select"
   | "interstitial";
 
@@ -32,6 +37,11 @@ export interface QuizQuestion {
     min?: number;
     max?: number;
   };
+  categories?: {
+    id: string;
+    title: string;
+    options: QuizOption[];
+  }[];
 }
 
 export interface QuizResponse {
@@ -58,6 +68,7 @@ export interface UserProfile {
   exercisePreference: string;
   hydration: string;
   badHabits: string[];
+  ingredients?: string[];
   periodRegularity: string;
   moodIssues: string;
   weightLossHistory: string;

@@ -40,9 +40,9 @@ export const femaleQuizQuestions: QuizQuestion[] = [
     type: "single-select",
     question: "How regular are your periods?",
     options: [
-      { id: "rarely", label: "I rarely get a period", image: "/images/icons/crying.avif" },
-      { id: "irregular", label: "My cycle is all over the place", image: "/images/icons/anxious-with-sweat.avif" },
-      { id: "somewhat-regular", label: "Somewhat regular but inconsistent", image: "/images/icons/unamused.avif" },
+      { id: "rarely", label: "I rarely get a period", image: "/images/icons/anxious-with-sweat.avif" },
+      { id: "irregular", label: "My cycle is all over the place", image: "/images/icons/crying.avif" },
+      { id: "somewhat-regular", label: "Somewhat regular but inconsistent", image: "/images/icons/weary.avif" },
       { id: "very-regular", label: "Very regular", image: "/images/icons/smiling.avif" },
     ],
     required: true,
@@ -54,8 +54,8 @@ export const femaleQuizQuestions: QuizQuestion[] = [
     question: "Do you experience mood swings, stress, or anxiety?",
     options: [
       { id: "yes-often", label: "Yes, I feel anxious or overwhelmed often", image: "/images/icons/anxious-with-sweat.avif" },
-      { id: "sometimes", label: "I have some mood swings but manage them", image: "/images/icons/unamused.avif" },
-      { id: "no", label: "Not really", image: "/images/icons/slightly-smiling-face.avif" },
+      { id: "sometimes", label: "I have some mood swings but manage them", image: "/images/icons/crying.avif" },
+      { id: "no", label: "Not really", image: "/images/icons/smiling-2.avif" },
     ],
     required: true,
   },

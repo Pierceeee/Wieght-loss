@@ -17,8 +17,9 @@ import {
 import { getQuestionByStep, getTotalSteps } from "@/lib/quiz-data";
 import { useQuizStore } from "@/hooks/useQuizState";
 import { startFunnelSubmission } from "@/lib/actions/submit-quiz";
-import { lbsToKg } from "@/lib/bmi";
+import { lbsToKg, kgToLbs } from "@/lib/bmi";
 import { ArrowLeft, Heart } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function QuizStepPage() {
   const router = useRouter();
@@ -252,7 +253,10 @@ export default function QuizStepPage() {
       {/* Main content */}
       <main className="flex-1 flex flex-col">
         <div className="flex-1 overflow-y-auto px-4 pt-8 pb-4">
-          <div className="max-w-md mx-auto flex flex-col min-h-full justify-center">
+          <div className={cn(
+            "mx-auto flex flex-col min-h-full justify-center w-full",
+            question.type === "visual-select" ? "max-w-2xl" : "max-w-md"
+          )}>
             {question.question && question.id === "age-range" ? (
               <div className="text-center mb-10">
                 <h1 className="text-5xl font-bold text-gray-900 mb-4">

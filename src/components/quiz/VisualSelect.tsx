@@ -3,7 +3,7 @@
 import { QuizOption } from "@/types/quiz";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { ArrowRight } from "lucide-react";
+import { Check } from "lucide-react";
 
 interface VisualSelectProps {
   options: QuizOption[];
@@ -13,32 +13,62 @@ interface VisualSelectProps {
 
 export function VisualSelect({ options, value, onChange }: VisualSelectProps) {
   return (
-    <div className="grid grid-cols-3 gap-6 w-full max-w-4xl mx-auto">
+    <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6 w-full mx-auto">
       {options.map((option, index) => {
         const isSelected = value === option.id;
         return (
           <button
             key={option.id}
             onClick={() => onChange(option.id)}
-            className="bg-white rounded-2xl overflow-hidden shadow-sm border border-transparent hover:border-gray-300 transition-all group active:scale-[0.98]"
+            className={cn(
+              "relative bg-white rounded-2xl overflow-hidden shadow-sm border-2 transition-all duration-300 group active:scale-[0.98]",
+              isSelected 
+                ? "border-pink-500 shadow-md ring-4 ring-pink-50" 
+                : "border-gray-100 hover:border-gray-300 hover:shadow-md"
+            )}
             style={{ animationDelay: `${index * 80}ms` }}
           >
-            <div className="relative aspect-[4/5] bg-gray-100 overflow-hidden">
+            {/* Selection Checkmark */}
+            <div className={cn(
+              "absolute top-2 right-2 z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center transition-all duration-300",
+              isSelected ? "bg-pink-500 scale-100 opacity-100" : "bg-gray-200 scale-0 opacity-0"
+            )}>
+              <Check className="w-3 h-3 sm:w-4 sm:h-4 text-white stroke-[3]" />
+            </div>
+
+            {/* Image Container */}
+            <div className="relative aspect-[3/4] bg-gray-50 overflow-hidden">
               {option.image && (
                 <Image
                   src={option.image}
                   alt={option.label}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  sizes="(max-width: 768px) 33vw, 25vw"
+                  className={cn(
+                    "object-cover transition-transform duration-700",
+                    isSelected ? "scale-105" : "group-hover:scale-105"
+                  )}
+                  priority={index < 3}
                 />
               )}
+              {/* Overlay for better selected state */}
+              <div className={cn(
+                "absolute inset-0 bg-pink-500/5 transition-opacity duration-300",
+                isSelected ? "opacity-100" : "opacity-0"
+              )} />
             </div>
 
-            <div className="p-5 flex items-center justify-between">
-              <span className="font-bold text-lg text-gray-800">
+            {/* Label Container */}
+            <div className={cn(
+              "py-3 px-1 sm:p-4 text-center transition-colors duration-300",
+              isSelected ? "bg-pink-50/50" : "bg-white"
+            )}>
+              <span className={cn(
+                "font-bold text-[10px] sm:text-sm md:text-base lg:text-lg block leading-tight tracking-tight uppercase",
+                isSelected ? "text-pink-600" : "text-gray-900"
+              )}>
                 {option.label}
               </span>
-              <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-gray-800" />
             </div>
           </button>
         );

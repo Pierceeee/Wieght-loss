@@ -137,7 +137,7 @@ export const femaleQuizQuestions: QuizQuestion[] = [
       title: "Understanding Your PCOS Pattern",
       description: "PCOS doesn't just affect cycles. It can influence how your body responds to food, stress, sleep, and activity.",
       highlight: "PCOS Reset Method is powered by AI technology trained on evidence-based lifestyle frameworks and clinical PCOS guidance — allowing your plan to adapt to your specific symptom pattern and preferences.",
-      image: "/images/interstitial-help.avif",
+      image: "/images/interstitial-transformation.png",
     },
     benefits: [
       "Cravings feel stronger",

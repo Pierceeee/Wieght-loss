@@ -48,7 +48,7 @@ export default function EmailCapturePage() {
         await completeFunnelWithEmail(sessionId, email);
       }
 
-      router.push("/offer");
+      router.push("/name");
     } catch (err) {
       console.error("Error saving email:", err);
       setError("Something went wrong. Please try again.");
@@ -68,24 +68,21 @@ export default function EmailCapturePage() {
           <div className="bg-[#F4A460] p-1 rounded-md">
             <Heart className="w-[18px] h-[18px] text-white fill-current" />
           </div>
-          <span className="font-bold text-xl text-gray-800">PCOS Plan</span>
+          <span className="font-bold text-xl text-gray-800">PCOS Reset Method</span>
         </div>
       </header>
 
       <main className="max-w-md mx-auto px-4 py-10">
         <div className="text-center mb-8">
           <h1 className="text-2xl leading-snug font-bold text-gray-900">
-            Enter your email to see how you can reach{" "}
-            <span className="text-[#E8924D]">{targetWeightLbs} lbs</span>
-            <br />
-            and alleviate PCOS symptoms
+            Enter your email to unlock your personalized PCOS metabolism breakdown and projected progress plan.
           </h1>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-semibold text-gray-800">
-              Your email
+              Your email address
             </label>
             <input
               id="email"
@@ -118,9 +115,9 @@ export default function EmailCapturePage() {
             <span className="text-sm text-gray-700 leading-relaxed">
               I agree to the{" "}
               <Link href="#" className="text-gray-900 font-medium underline">
-                Privacy policy
+                Privacy Policy
               </Link>{" "}
-              and receiving future information from PCOS Plan
+              and consent to receive important updates related to the PCOS Reset Method
             </span>
           </label>
 
@@ -146,7 +143,7 @@ export default function EmailCapturePage() {
         <div className="mt-6 flex items-start gap-3 text-xs text-gray-600">
           <Lock className="w-4 h-4 mt-0.5 text-gray-400 flex-shrink-0" />
           <p className="leading-relaxed">
-            We respect your privacy and use your email only to send you the PCOS Plan program and other important emails. You won&apos;t receive spam.
+            We respect your privacy. Your email will only be used to deliver your personalized program details and essential updates. No spam — ever.
           </p>
         </div>
       </main>

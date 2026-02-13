@@ -58,6 +58,7 @@ export interface QuizState {
 
 export interface UserProfile {
   gender: "male" | "female";
+  name?: string;
   age: number;
   height: number;
   currentWeight: number;

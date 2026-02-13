@@ -6,17 +6,17 @@ import { calculateBMI, getBMIResult } from "@/lib/bmi";
 import Image from "next/image";
 
 function getExerciseLabel(exercisePreference: string) {
-  if (exercisePreference === "regularly") return "Regular";
-  if (exercisePreference === "occasionally") return "Light exercise";
-  if (exercisePreference === "try-to-stay-active") return "Light exercise";
-  return "Beginner";
+  if (exercisePreference === "regularly") return "Moderate activity";
+  if (exercisePreference === "occasionally") return "Light activity";
+  if (exercisePreference === "try-to-stay-active") return "Light activity";
+  return "Low activity";
 }
 
 function getActivityLabel(activityLevel: string) {
   if (activityLevel === "always-working-out") return "High";
-  if (activityLevel === "moving-a-lot") return "Moderate";
-  if (activityLevel === "desk-job") return "Low";
-  return "Low";
+  if (activityLevel === "moving-a-lot") return "Above average";
+  if (activityLevel === "desk-job") return "Average";
+  return "Average";
 }
 
 function BMIGauge() {
@@ -76,12 +76,12 @@ export function PersonalSummary() {
   const profile = getUserProfile();
 
   const bmiText = useMemo(() => {
-    if (!profile) return "Overweight";
+    if (!profile) return "Normal range";
     return getBMIResult(calculateBMI(profile.currentWeight, profile.height)).category;
   }, [profile]);
 
-  const exerciseLabel = profile ? getExerciseLabel(profile.exercisePreference) : "Light exercise";
-  const activityLabel = profile ? getActivityLabel(profile.activityLevel) : "Low";
+  const exerciseLabel = profile ? getExerciseLabel(profile.exercisePreference) : "Moderate activity";
+  const activityLabel = profile ? getActivityLabel(profile.activityLevel) : "Average";
 
   return (
     <div className="max-w-sm mx-auto">
@@ -95,10 +95,8 @@ export function PersonalSummary() {
 
           <BMIGauge />
 
-          <p className="text-[10px] text-gray-500 mt-3 leading-relaxed px-2">
-            <span className="font-semibold text-gray-600">Risks of unhealthy BMI:</span>{" "}
-            High blood pressure, Increased risk of heart attack, stroke, type 2 diabetes,
-            chronic back and joint pain
+          <p className="text-[10px] text-gray-600 mt-3 leading-relaxed px-2">
+            A healthy BMI provides a strong foundation for improving body composition and reaching your desired shape.
           </p>
         </div>
 
@@ -112,9 +110,9 @@ export function PersonalSummary() {
               </div>
               <div>
                 <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
-                  PCOS SYMPTOMS
+                  PCOS symptom indicators
                 </p>
-                <p className="font-bold text-sm text-gray-900">Present</p>
+                <p className="font-bold text-sm text-gray-900">Detected</p>
               </div>
             </div>
 
@@ -124,7 +122,7 @@ export function PersonalSummary() {
               </div>
               <div>
                 <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
-                  EXERCISE
+                  Exercise habits
                 </p>
                 <p className="font-bold text-sm text-gray-900">{exerciseLabel}</p>
               </div>
@@ -136,7 +134,7 @@ export function PersonalSummary() {
               </div>
               <div>
                 <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
-                  ACTIVITY LEVEL
+                  Daily activity level
                 </p>
                 <p className="font-bold text-sm text-gray-900">{activityLabel}</p>
               </div>

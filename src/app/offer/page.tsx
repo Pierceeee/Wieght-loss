@@ -1,255 +1,356 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
+import React, { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useQuizStore } from "@/hooks/useQuizState";
-import { getFunnelSubmission } from "@/lib/supabase";
-import { getFallbackAnalysis } from "@/lib/utils/fallback-analysis";
-import { 
-  Check, Shield, Clock, Sparkles, ChefHat, ListChecks, 
-  Users, Zap, Star, ArrowRight, Dumbbell, Apple, Lock 
-} from "lucide-react";
+import { kgToLbs } from "@/lib/bmi";
+import { CheckCircle2, Timer, ChevronRight, TrendingDown, Star } from "lucide-react";
 
-interface PricingPlan {
-  id: string;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  period: string;
-  billing: string;
-  popular?: boolean;
-  savings?: string;
-  tagline: string;
-}
+// --- Configuration ---
+const INITIAL_TIMER_SECONDS = 15 * 60;
+const CONSERVATIVE_WEEKLY_LOSS_LBS = 1.5;
+const DEFAULT_NAME = "Guest";
 
-const plans: PricingPlan[] = [
-  {
-    id: "monthly",
-    name: "Monthly",
-    tagline: "Flexibility first",
-    price: 19.99,
-    period: "/mo",
-    billing: "Billed monthly, cancel anytime",
-  },
-  {
-    id: "yearly",
-    name: "Annual",
-    tagline: "Total transformation",
-    price: 9.99,
-    originalPrice: 19.99,
-    period: "/mo",
-    billing: "$119.88 billed yearly",
-    popular: true,
-    savings: "Save 50%",
-  },
-  {
-    id: "lifetime",
-    name: "Lifetime",
-    tagline: "Forever access",
-    price: 199,
-    period: "",
-    billing: "One-time payment",
-    savings: "Best Value",
-  },
+const PLANS = [
+  { id: "7day", title: "7-day plan", original: 22.20, price: 6.93, daily: 0.99, featured: false },
+  { id: "1month", title: "1-month plan", original: 44.40, price: 15.19, daily: 0.50, featured: false },
+  { id: "3month", title: "3-month plan", original: 75.49, price: 25.99, daily: 0.28, featured: true, tag: "BEST VALUE" },
 ];
 
 export default function OfferPage() {
-  const [selectedPlan, setSelectedPlan] = useState<string>("yearly");
-  const [isLoading, setIsLoading] = useState(false);
-  const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
-  const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(true);
-  const { sessionId, getUserProfile, gender } = useQuizStore();
+  const router = useRouter();
+  const { responses } = useQuizStore();
+  const [timeLeft, setTimeLeft] = useState(INITIAL_TIMER_SECONDS);
+  const [mounted, setMounted] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState("3month");
 
-  const features = gender === "male" ? [
-    { icon: Dumbbell, text: "Personalized workout & nutrition plans", bold: "Tailored to your frame" },
-    { icon: ChefHat, text: "Muscle-building meal recipes", bold: "High-protein" },
-    { icon: ListChecks, text: "Weekly meal prep & shopping lists", bold: "Save 4+ hours/week" },
-    { icon: Sparkles, text: "AI-powered macro optimization", bold: "Smart adjustments" },
-    { icon: Clock, text: "Progress tracking & adjustments", bold: "Data-driven" },
-    { icon: Users, text: "Community support access", bold: "Private group" },
-  ] : [
-    { icon: Apple, text: "PCOS-friendly personalized meal plans", bold: "Hormone-focused" },
-    { icon: ChefHat, text: "Hormone-balancing recipes", bold: "Anti-inflammatory" },
-    { icon: ListChecks, text: "Weekly grocery shopping lists", bold: "Stress-free shopping" },
-    { icon: Sparkles, text: "AI-powered recommendations", bold: "Customized for you" },
-    { icon: Clock, text: "Progress tracking & plan adjustments", bold: "Cyclical tracking" },
-    { icon: Users, text: "Community support access", bold: "Sisterhood support" },
-  ];
+  useEffect(() => { setMounted(true); }, []);
+
+  const userData = useMemo(() => {
+    const name = (responses["name"] as string) || 
+                 (mounted && typeof window !== 'undefined' ? localStorage.getItem("pcos-user-name") : null) || 
+                 DEFAULT_NAME;
+
+    const rawWeight = responses["current-weight-lbs"] as number || 
+                     (responses["current-weight"] ? Math.round(kgToLbs(responses["current-weight"] as number)) : 150);
+    
+    return {
+      userName: name,
+      currentWeightLbs: rawWeight,
+      targetWeight: rawWeight - (CONSERVATIVE_WEEKLY_LOSS_LBS * 4),
+    };
+  }, [responses, mounted]);
 
   useEffect(() => {
-    const fetchAnalysis = async () => {
-      if (!sessionId) {
-        setIsLoadingAnalysis(false);
-        return;
-      }
-      try {
-        const submission = await getFunnelSubmission(sessionId);
-        const profile = getUserProfile();
-        setAiAnalysis(submission?.ai_analysis || (profile ? getFallbackAnalysis(profile) : null));
-      } catch (error) {
-        const profile = getUserProfile();
-        setAiAnalysis(profile ? getFallbackAnalysis(profile) : null);
-      } finally {
-        setIsLoadingAnalysis(false);
-      }
-    };
-    fetchAnalysis();
-  }, [sessionId, getUserProfile]);
+    if (timeLeft <= 0) return;
+    const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
+    return () => clearInterval(timer);
+  }, [timeLeft]);
 
-  const handleCheckout = async () => {
-    setIsLoading(true);
-    // ... (logic remains same)
-    setIsLoading(false);
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const selectedPlanData = plans.find((p) => p.id === selectedPlan);
+  const handleCheckout = () => {
+    // TODO: Implement Stripe checkout or payment flow
+    console.log("Selected plan:", selectedPlan);
+    alert("Checkout functionality coming soon!");
+  };
+
+  if (!mounted) return <SkeletonLoader />;
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] text-[#3d2e1f]">
-      {/* Dynamic Background */}
-      <div className="fixed inset-0 pointer-events-none opacity-40">
-        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#c9a88e]/20 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#a8b5a0]/20 blur-[120px] rounded-full" />
+    <div className="min-h-screen bg-slate-50 antialiased pb-20">
+      {/* Urgency Bar */}
+      <div className="sticky top-0 z-50 bg-black text-white py-2 px-4 flex justify-center items-center gap-3 text-sm font-medium">
+        <Timer size={16} className="text-orange-400" />
+        <span>Reserved discount expires in <span className="text-orange-400 font-mono">{formatTime(timeLeft)}</span></span>
       </div>
 
-      <header className="sticky top-0 z-50 border-b border-[#d4c5b5]/20 bg-[#faf8f5]/80 backdrop-blur-md">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
-          <span className="font-display text-xl font-bold italic tracking-tight">Wellness Journey.</span>
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#6b5d52]">
-            <Lock className="w-3 h-3" /> Secure Checkout
-          </div>
-        </div>
-      </header>
-
-      <main className="relative max-w-5xl mx-auto px-6 py-12">
-        {/* Progress Header */}
-        <div className="flex flex-col items-center text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#a8b5a0]/10 text-[#5a6b50] rounded-full text-xs font-bold mb-6 border border-[#a8b5a0]/20">
-            <Sparkles className="w-3 h-3" /> 100% PERSONALIZED FOR YOU
-          </div>
-          <h1 className="text-4xl md:text-6xl font-bold font-display leading-[1.1] mb-6">
-            Unlock your <span className="italic text-[#c9a88e]">custom roadmap</span>
-          </h1>
-          <p className="text-lg text-[#6b5d52] max-w-xl">
-            We've analyzed your data. Based on your profile, you are ready to see significant results in the next 12 weeks.
-          </p>
-        </div>
-
-        <div className="grid lg:grid-cols-12 gap-12">
-          {/* Left Column: Analysis & Features */}
-          <div className="lg:col-span-7 space-y-8">
-            <section className="bg-white rounded-2xl p-8 shadow-sm border border-[#d4c5b5]/30">
-              <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-                <div className="p-2 bg-[#c9a88e]/10 rounded-lg"><Sparkles className="w-5 h-5 text-[#c9a88e]" /></div>
-                Our Analysis
-              </h2>
-              {isLoadingAnalysis ? (
-                 <div className="animate-pulse space-y-3">
-                   <div className="h-4 bg-gray-100 rounded w-3/4" />
-                   <div className="h-4 bg-gray-100 rounded w-full" />
-                   <div className="h-4 bg-gray-100 rounded w-5/6" />
-                 </div>
-              ) : (
-                <div className="prose prose-stone">
-                  <p className="text-[#4a3d33] leading-relaxed italic whitespace-pre-wrap">"{aiAnalysis}"</p>
-                </div>
-              )}
-            </section>
-
-            <section>
-              <h3 className="text-xl font-bold mb-6">What's inside your plan:</h3>
-              <div className="grid sm:grid-cols-2 gap-4">
-                {features.map((f, i) => (
-                  <div key={i} className="flex gap-4 p-4 bg-white/50 rounded-xl border border-transparent hover:border-[#c9a88e]/30 transition-all">
-                    <f.icon className="w-6 h-6 text-[#c9a88e] shrink-0" />
-                    <div>
-                      <p className="text-sm font-bold text-[#3d2e1f]">{f.bold}</p>
-                      <p className="text-xs text-[#6b5d52]">{f.text}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          </div>
-
-          {/* Right Column: Pricing Sticky-ish */}
-          <div className="lg:col-span-5">
-            <div className="sticky top-24 space-y-4">
-              {plans.map((plan) => (
-                <div
-                  key={plan.id}
-                  onClick={() => setSelectedPlan(plan.id)}
-                  className={`cursor-pointer relative p-6 rounded-2xl border-2 transition-all duration-300 ${
-                    selectedPlan === plan.id 
-                    ? "border-[#3d2e1f] bg-white shadow-xl scale-[1.02]" 
-                    : "border-[#d4c5b5]/30 bg-white/50 hover:border-[#c9a88e]/50"
-                  }`}
-                >
-                  {plan.popular && (
-                    <span className="absolute -top-3 right-6 bg-[#3d2e1f] text-white text-[10px] font-black uppercase tracking-tighter px-3 py-1 rounded-full">
-                      Highly Recommended
-                    </span>
-                  )}
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h4 className="font-bold text-lg">{plan.name}</h4>
-                      <p className="text-xs text-[#6b5d52]">{plan.tagline}</p>
-                    </div>
-                    <div className="text-right">
-                      <div className="flex items-baseline justify-end gap-1">
-                        <span className="text-2xl font-bold">${plan.price}</span>
-                        <span className="text-sm text-[#6b5d52]">{plan.period}</span>
-                      </div>
-                      {plan.originalPrice && (
-                        <p className="text-xs line-through text-red-400 font-medium">Was ${plan.originalPrice}</p>
-                      )}
-                    </div>
-                  </div>
-                  <p className="text-[11px] text-[#6b5d52] mt-4 pt-4 border-t border-[#d4c5b5]/20">
-                    {plan.billing}
-                  </p>
-                </div>
-              ))}
-
-              <button
-                onClick={handleCheckout}
-                disabled={isLoading}
-                className="w-full py-5 bg-[#3d2e1f] text-white rounded-2xl font-bold text-lg shadow-lg hover:bg-[#2d1e0f] transition-all flex items-center justify-center gap-3 group mt-6"
-              >
-                {isLoading ? <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : (
-                  <>Get My Plan <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></>
-                )}
-              </button>
-
-              <div className="flex flex-col items-center gap-4 py-6">
-                <div className="flex items-center gap-2 text-xs font-medium text-[#6b5d52]">
-                  <Shield className="w-4 h-4 text-[#a8b5a0]" /> 7-Day Risk-Free Guarantee
-                </div>
-                <div className="flex -space-x-2">
-                  {[1,2,3,4,5].map(i => <Star key={i} className="w-3 h-3 text-[#c9a88e] fill-[#c9a88e]" />)}
-                  <span className="text-[10px] font-bold ml-2 text-[#6b5d52]">4.9/5 RATING</span>
-                </div>
-              </div>
+      <main className="max-w-2xl mx-auto px-4 mt-8">
+        <section className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 overflow-hidden border border-slate-100">
+          
+          {/* Hero Section */}
+          <div className="p-8 text-center bg-gradient-to-b from-slate-50 to-white">
+            <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+              Great progress, {userData.userName}!
+            </h1>
+            <p className="mt-3 text-slate-600 text-lg">Your personalized PCOS Reset Method is ready.</p>
+            
+            <div className="mt-8 grid grid-cols-2 gap-4">
+              <WeightCard label="Starting" value={`${userData.currentWeightLbs} lbs`} />
+              <WeightCard label="Goal (4 Weeks)" value={`${userData.targetWeight} lbs`} highlight />
             </div>
           </div>
-        </div>
-      </main>
 
-      {/* Trust Footer */}
-      <footer className="bg-white border-t border-[#d4c5b5]/20 py-12 mt-20">
-        <div className="max-w-5xl mx-auto px-6 text-center">
-          <div className="flex justify-center gap-8 mb-8 opacity-50 grayscale">
-            {/* Add placeholder logos or text for "As seen on" */}
-            <span className="font-bold">HEALTHLINE</span>
-            <span className="font-bold">VOGUE</span>
-            <span className="font-bold">WELL+GOOD</span>
+          <div className="p-8 pt-0 space-y-10">
+            {/* Snapshot */}
+            <div className="bg-orange-50/50 rounded-2xl p-6 border border-orange-100">
+              <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center justify-center gap-2">
+                <Star size={18} className="fill-orange-400 text-orange-400" />
+                Goal Snapshot
+              </h2>
+              <div className="grid grid-cols-2 gap-y-6 gap-x-4">
+                <SnapshotItem label="Body Fat" value="Lower" />
+                <SnapshotItem label="Symptoms" value="Reduced" />
+                <SnapshotItem label="Energy" value="Higher" />
+                <SnapshotItem label="Stress" value="Optimized" />
+              </div>
+            </div>
+
+            {/* Pricing */}
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 text-center mb-6">Select Your Transformation</h2>
+              <div className="space-y-4">
+                {PLANS.map((plan) => (
+                  <PlanCard 
+                    key={plan.id}
+                    {...plan}
+                    isActive={selectedPlan === plan.id}
+                    onClick={() => setSelectedPlan(plan.id)}
+                  />
+                ))}
+              </div>
+              <p className="mt-4 text-center text-sm text-slate-500 italic">
+                Most women choose the 3-month plan for more stable metabolic adaptation.
+              </p>
+            </div>
+
+            {/* App Preview & Ratings */}
+            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+              <h3 className="text-lg font-bold text-slate-900 mb-4 text-center">
+                Personal progress journal to monitor your results
+              </h3>
+              <div className="relative max-w-sm mx-auto mb-6">
+                <div className="bg-slate-200 rounded-2xl aspect-[9/16] flex items-center justify-center">
+                  <p className="text-slate-500 text-sm">(Illustrative example)</p>
+                </div>
+                <button className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 rounded-full p-2 shadow-md hover:bg-white">
+                  <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 rounded-full p-2 shadow-md hover:bg-white">
+                  <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+              
+              {/* Ratings */}
+              <div className="text-center space-y-2">
+                <p className="text-sm font-bold text-slate-900">28,000+ five-star user ratings</p>
+                <div className="flex items-center justify-center gap-6 text-sm">
+                  <div className="flex items-center gap-1">
+                    <span className="font-bold text-slate-900">4.8</span>
+                    <span className="text-slate-500">App Store</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="font-bold text-slate-900">4.8</span>
+                    <span className="text-slate-500">Google Play</span>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-500">One of the highest-rated personalized weight-loss companions</p>
+              </div>
+            </div>
+
+            {/* Testimonials */}
+            <div>
+              <h3 className="text-xl font-bold text-slate-900 mb-6 text-center">Success stories from our users</h3>
+              <div className="space-y-4">
+                <TestimonialCard 
+                  date="18 Oct"
+                  title="Simple to follow and very flexible"
+                  text="The program is easy to follow and helped me manage my PCOS-related symptoms better. I also started drinking more water, something I struggled with before, and I love that I can choose different meal options whenever I want. The daily tips are practical and easy to apply, especially the small nutrition suggestions. The best part is that I don't feel constantly hungry anymore."
+                  author="Amanda"
+                />
+                <TestimonialCard 
+                  date="12 Aug"
+                  title="It helped me get back on track"
+                  text="I first tried the program earlier this year and saw noticeable progress, so I decided to return to it again. During a stressful period I gained weight quickly, but following the structured plan again helped me regain control. Based on my previous experience, I expect to reach my goal within the next several weeks."
+                  author="Nicole"
+                />
+                <TestimonialCard 
+                  date="02 Sep"
+                  title="Exactly the structure I needed"
+                  text="I love the reminders and tracking tools — they keep me consistent with meals, hydration, and daily habits. The personalized meal plans and shopping lists make everything easier, and I finally feel like I have a clear system instead of guessing what to eat. I would definitely recommend it to anyone trying to improve their nutrition and weight management."
+                  author="Laura"
+                />
+              </div>
+            </div>
+
+            {/* Stats Banner */}
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100 text-center">
+              <p className="text-2xl font-bold text-slate-900 mb-2">9 out of 10 women</p>
+              <p className="text-sm text-slate-600">reported improvements in PCOS-related symptoms</p>
+              <p className="text-xs text-slate-400 mt-3 italic">Results are not typical. Individual results may vary.</p>
+            </div>
+
+            {/* Final CTA Section */}
+            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 space-y-4">
+              <div className="text-center">
+                <p className="text-lg font-semibold text-slate-900 mb-2">
+                  Your personalized PCOS Reset Method is ready.
+                </p>
+                <p className="text-sm text-green-600 font-medium">
+                  ✓ Your promo code has been successfully applied
+                </p>
+              </div>
+
+              {/* Pricing Repeat */}
+              <div className="space-y-3 py-4">
+                {PLANS.map((plan) => (
+                  <PlanCardCompact 
+                    key={plan.id}
+                    {...plan}
+                    isActive={selectedPlan === plan.id}
+                    onClick={() => setSelectedPlan(plan.id)}
+                  />
+                ))}
+              </div>
+
+              <button 
+                onClick={handleCheckout}
+                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold text-lg shadow-lg hover:bg-slate-800 transition-all"
+              >
+                Get My Plan
+              </button>
+
+              <p className="text-xs text-slate-500 text-center leading-relaxed">
+                We've automatically applied your discount to the first subscription payment. Please note that your subscription will renew automatically at the standard price once the selected billing period ends. If you prefer not to continue, you can cancel your subscription anytime directly within the PCOS Reset Method app.
+              </p>
+            </div>
+
+            {/* Trust Badges */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-center gap-2 text-sm font-semibold text-slate-700">
+                <CheckCircle2 size={16} className="text-green-600" />
+                <span>Guaranteed Safe Checkout</span>
+              </div>
+              <div className="bg-yellow-50 border border-yellow-100 rounded-xl p-4 text-center">
+                <p className="text-sm font-bold text-slate-900 mb-1">30-Day Money-Back Guarantee</p>
+                <p className="text-xs text-slate-600">If you do not notice meaningful progress, you can request a full refund within 30 days of purchase.</p>
+              </div>
+            </div>
+
+            {/* Disclaimer */}
+            <div className="text-center space-y-3 pt-4 border-t border-slate-100">
+              <p className="text-xs text-slate-400 leading-relaxed">
+                <strong>DISCLAIMER:</strong> The PCOS Reset Method website, app, services, and products are designed to support general wellness. Our programs are not intended to diagnose, treat, cure, or prevent any disease and should not replace professional medical advice or treatment. Please consult a qualified healthcare professional before making medical decisions.
+              </p>
+              <p className="text-xs text-slate-400">
+                © 2026 PCOS Reset Method. All rights reserved.
+              </p>
+            </div>
           </div>
-          <p className="text-xs text-[#6b5d52] max-w-2xl mx-auto leading-relaxed">
-            Results may vary. This plan is a wellness tool and does not replace medical advice. 
-            By subscribing, you agree to our Terms.
-          </p>
+        </section>
+      </main>
+    </div>
+  );
+}
+
+// --- Sub-components ---
+
+function WeightCard({ label, value, highlight = false }: { label: string, value: string, highlight?: boolean }) {
+  return (
+    <div className={`p-4 rounded-2xl border ${highlight ? 'border-green-200 bg-green-50/50' : 'border-slate-100 bg-slate-50/50'}`}>
+      <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-1">{label}</p>
+      <p className={`text-2xl font-black ${highlight ? 'text-green-600' : 'text-slate-900'}`}>{value}</p>
+    </div>
+  );
+}
+
+function SnapshotItem({ label, value }: { label: string, value: string }) {
+  return (
+    <div className="flex flex-col items-center">
+      <span className="text-xs font-semibold text-slate-500 uppercase tracking-tighter">{label}</span>
+      <span className="text-lg font-extrabold text-slate-900">{value}</span>
+    </div>
+  );
+}
+
+function PlanCard({ title, original, price, daily, featured, tag, isActive, onClick }: any) {
+  return (
+    <div 
+      onClick={onClick}
+      className={`relative p-5 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between ${
+        isActive ? 'border-orange-500 bg-orange-50/30' : 'border-slate-100 bg-white hover:border-slate-200'
+      }`}
+    >
+      {tag && (
+        <span className="absolute -top-3 left-6 bg-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full ring-4 ring-white">
+          {tag}
+        </span>
+      )}
+      <div className="flex items-center gap-4">
+        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${isActive ? 'border-orange-500' : 'border-slate-200'}`}>
+          {isActive && <div className="w-3 h-3 bg-orange-500 rounded-full" />}
         </div>
-      </footer>
+        <div>
+          <h3 className="font-bold text-slate-900">{title}</h3>
+          <p className="text-xs text-slate-500 font-medium">${daily} / day</p>
+        </div>
+      </div>
+      <div className="text-right">
+        <p className="text-xs text-slate-400 line-through">${original.toFixed(2)}</p>
+        <p className="text-2xl font-black text-slate-900">${price}</p>
+      </div>
+    </div>
+  );
+}
+
+function SkeletonLoader() {
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center p-8">
+      <div className="w-full max-w-2xl bg-white h-96 rounded-3xl animate-pulse" />
+    </div>
+  );
+}
+
+function PlanCardCompact({ title, original, price, daily, isActive, onClick }: any) {
+  return (
+    <div 
+      onClick={onClick}
+      className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between ${
+        isActive ? 'border-orange-500 bg-orange-50/30' : 'border-slate-200 hover:border-slate-300'
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isActive ? 'border-orange-500' : 'border-slate-200'}`}>
+          {isActive && <div className="w-2.5 h-2.5 bg-orange-500 rounded-full" />}
+        </div>
+        <div>
+          <h3 className="font-semibold text-slate-900 text-sm">{title}</h3>
+          <p className="text-xs text-slate-500">${daily} / day</p>
+        </div>
+      </div>
+      <div className="text-right">
+        <p className="text-xs text-slate-400 line-through">${original.toFixed(2)}</p>
+        <p className="text-xl font-bold text-slate-900">${price}</p>
+      </div>
+    </div>
+  );
+}
+
+function TestimonialCard({ date, title, text, author }: { date: string, title: string, text: string, author: string }) {
+  return (
+    <div className="bg-white rounded-xl p-5 border border-slate-100 shadow-sm">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs font-semibold text-slate-500">{date}</span>
+        <div className="flex gap-0.5">
+          {[...Array(5)].map((_, i) => (
+            <Star key={i} size={12} className="fill-yellow-400 text-yellow-400" />
+          ))}
+        </div>
+      </div>
+      <h4 className="font-bold text-slate-900 mb-2">{title}</h4>
+      <p className="text-sm text-slate-600 leading-relaxed mb-3">{text}</p>
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-semibold text-slate-900">{author}</p>
+        <span className="text-xs text-green-600 font-medium">✓ Verified Customer</span>
+      </div>
     </div>
   );
 }

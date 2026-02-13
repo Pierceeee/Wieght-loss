@@ -4,7 +4,7 @@ import Image from "next/image";
 
 const sources = [
   { name: "World Health Organization (WHO)", logo: "/images/icons/organisation-who.png" },
-  { name: "Pubmed", logo: "/images/icons/organisation-pubmed.png" },
+  { name: "PubMed", logo: "/images/icons/organisation-pubmed.png" },
   { name: "The American Journal of Clinical Nutrition", logo: "/images/icons/organisation-tajocn.png" },
   { name: "National Center for Biotechnology Information (NCBI)", logo: "/images/icons/organisation-ncbi.png" },
   { name: "WebMD", logo: "/images/icons/organisation-webmd.png" },
@@ -14,6 +14,9 @@ const sources = [
 export function ScienceList() {
   return (
     <div className="max-w-lg mx-auto">
+      <p className="text-center text-gray-600 mb-6">
+        Our recommendations are informed by trusted global and clinical health sources:
+      </p>
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         {sources.map((source) => (
           <div key={source.name} className="flex items-center justify-between px-5 py-4 border-b border-gray-100 last:border-b-0">

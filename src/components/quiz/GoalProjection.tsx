@@ -22,7 +22,8 @@ export function GoalProjection() {
 
   return (
     <div className="max-w-lg mx-auto">
-      <h2 className="text-center text-2xl font-bold text-[#ff9933] mb-6">{targetLbs} lbs by {goalDate}</h2>
+      <h2 className="text-center text-2xl font-bold text-[#ff9933] mb-2">{targetLbs} lbs by {goalDate}</h2>
+      <p className="text-center text-sm text-gray-600 mb-4">Weight Now: {currentLbs} lbs • Goal: {targetLbs} lbs</p>
 
       <div className="bg-white border border-gray-200 rounded-xl p-4">
         <svg viewBox="0 0 520 300" className="w-full h-auto">
@@ -34,10 +35,10 @@ export function GoalProjection() {
           <line x1="20" y1="140" x2="500" y2="140" stroke="#e5e7eb" strokeDasharray="4 4" />
           <line x1="20" y1="220" x2="500" y2="220" stroke="#e5e7eb" strokeDasharray="4 4" />
 
-          {/* Usual weight loss journey (red dashed) */}
+          {/* Typical weight-loss journey (red dashed) */}
           <path d="M 30 95 C 140 100, 220 70, 500 65" fill="none" stroke="#ef4444" strokeWidth="4" strokeDasharray="10 8" />
 
-          {/* PCOS Plan line (orange solid) */}
+          {/* PCOS Reset Method line (orange solid) */}
           <path d="M 30 105 C 120 100, 160 170, 250 155 C 320 140, 360 210, 500 200" fill="none" stroke="#ff9933" strokeWidth="5" />
 
           {/* Dots on the line */}
@@ -60,11 +61,11 @@ export function GoalProjection() {
         <div className="space-y-2 mt-2 text-xs">
           <div className="flex items-center gap-2">
             <span className="w-10 h-[3px] bg-[#ff9933] inline-block rounded-full" />
-            <span className="font-medium text-gray-700">With PCOS Plan</span>
+            <span className="font-medium text-gray-700">Estimated Timeline With PCOS Reset Method</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-10 h-[3px] inline-block bg-[repeating-linear-gradient(90deg,#ef4444,#ef4444_5px,transparent_5px,transparent_10px)]" />
-            <span className="font-medium text-gray-700">Usual weight loss journey</span>
+            <span className="font-medium text-gray-700">Typical weight-loss journey</span>
           </div>
         </div>
       </div>

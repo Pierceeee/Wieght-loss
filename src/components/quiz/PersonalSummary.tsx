@@ -144,7 +144,7 @@ export function PersonalSummary() {
           {/* Right side - person image */}
           <div className="relative w-36 flex-shrink-0 self-end">
             <Image
-              src="/images/personal-summary.avif"
+              src="/images/personal-summary.png"
               alt="Personal summary"
               width={160}
               height={220}

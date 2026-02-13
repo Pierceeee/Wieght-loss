@@ -124,19 +124,11 @@ export default function OfferPage() {
                 Personal progress journal to monitor your results
               </h3>
               <div className="relative max-w-sm mx-auto mb-6">
-                <div className="bg-slate-200 rounded-2xl aspect-[9/16] flex items-center justify-center">
-                  <p className="text-slate-500 text-sm">(Illustrative example)</p>
-                </div>
-                <button className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 rounded-full p-2 shadow-md hover:bg-white">
-                  <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 rounded-full p-2 shadow-md hover:bg-white">
-                  <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
+                <img 
+                  src="/images/progress-journal.png" 
+                  alt="Before and after transformation" 
+                  className="w-full rounded-2xl shadow-md"
+                />
               </div>
               
               {/* Ratings */}

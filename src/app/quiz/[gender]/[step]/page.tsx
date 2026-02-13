@@ -23,8 +23,10 @@ import { ArrowLeft, Heart } from "lucide-react";
 export default function QuizStepPage() {
   const router = useRouter();
   const params = useParams();
-  const step = parseInt(params.step as string, 10);
+  const urlStep = parseInt(params.step as string, 10);
   const gender = params.gender as "male" | "female";
+  // URL step excludes the first internal quiz question (age-range).
+  const step = urlStep + 1;
 
   const {
     setResponse,
@@ -47,7 +49,7 @@ export default function QuizStepPage() {
 
   // Create initial funnel submission when user starts the quiz (step 1)
   useEffect(() => {
-    if (step === 1 && sessionId && !submissionCreated) {
+    if (urlStep === 1 && sessionId && !submissionCreated) {
       startFunnelSubmission(sessionId, { ...responses, gender })
         .then((result) => {
           if (result.success) {
@@ -66,7 +68,9 @@ export default function QuizStepPage() {
   const question = getQuestionByStep(step, gender);
   const totalSteps = getTotalSteps(gender);
 
-  if (!question || step < 1 || step > totalSteps) {
+  const totalUrlSteps = totalSteps - 1;
+
+  if (!question || urlStep < 1 || urlStep > totalUrlSteps) {
     router.push(`/quiz/${gender}/1`);
     return null;
   }
@@ -77,13 +81,13 @@ export default function QuizStepPage() {
     if (step === totalSteps) {
       router.push("/generating");
     } else {
-      router.push(`/quiz/${gender}/${step + 1}`);
+      router.push(`/quiz/${gender}/${urlStep + 1}`);
     }
   };
 
   const handleBack = () => {
-    if (step > 1) {
-      router.push(`/quiz/${gender}/${step - 1}`);
+    if (urlStep > 1) {
+      router.push(`/quiz/${gender}/${urlStep - 1}`);
     }
   };
 
@@ -100,7 +104,7 @@ export default function QuizStepPage() {
 
     if (question.type === "single-select" || question.type === "visual-select") {
       setTimeout(() => {
-        router.push(`/quiz/${gender}/${step + 1}`);
+        router.push(`/quiz/${gender}/${urlStep + 1}`);
       }, 280);
     }
 
@@ -209,7 +213,7 @@ export default function QuizStepPage() {
           <div className="h-1 bg-[#ffd4b3]">
             <div
               className="h-full bg-[#ff9933] transition-all duration-500"
-              style={{ width: `${((step - 1) / (totalSteps - 1)) * 100}%` }}
+              style={{ width: `${(urlStep / totalUrlSteps) * 100}%` }}
             />
           </div>
           <div className="relative px-4 py-3 bg-white border-b border-gray-100">
@@ -227,7 +231,7 @@ export default function QuizStepPage() {
               <p className="font-bold text-xl text-gray-800">PCOS Plan</p>
             </div>
             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-gray-600">
-              {step - 1}/{totalSteps - 1}
+              {urlStep}/{totalUrlSteps}
             </span>
           </div>
         </header>

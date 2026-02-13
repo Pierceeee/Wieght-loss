@@ -92,7 +92,7 @@ export const femaleQuizQuestions: QuizQuestion[] = [
       title: "Take Back Control of Your PCOS Health",
       description: "Based on your answers, your symptoms may not be a willpower issue — they often reflect how PCOS affects metabolism, appetite signals, and energy regulation.",
       highlight: "Most women begin noticing measurable symptom improvements within weeks.",
-      image: "/images/interstitial-help.avif",
+      image: "/images/interstitial-motivation-1.png",
     },
     benefits: [
       "Support hormone-driven appetite balance",
@@ -123,9 +123,9 @@ export const femaleQuizQuestions: QuizQuestion[] = [
     type: "visual-select",
     question: "Which silhouette feels closest to your current shape?",
     options: [
-      { id: "regular", label: "STANDARD", image: "/images/body-type-regular.avif" },
-      { id: "plump", label: "CURVY", image: "/images/body-type-plump.avif" },
-      { id: "extra", label: "PLUS", image: "/images/body-type-extra.avif" },
+      { id: "regular", label: "STANDARD", image: "/images/body-type-regular.png" },
+      { id: "plump", label: "CURVY", image: "/images/body-type-plump.png" },
+      { id: "extra", label: "PLUS", image: "/images/body-type-extra.png" },
     ],
     required: true,
   },
@@ -191,7 +191,7 @@ export const femaleQuizQuestions: QuizQuestion[] = [
       title: "Stay on Track with Healthy Habits",
       description:
         "Women in their 30s, a gentle reminder: building consistent daily habits that help you reach and maintain a weight range of 142lbs to 158lbs can accelerate your progress toward a stronger, healthier body.",
-      image: "/images/female-20s.avif",
+      image: "/images/motivation-2.png",
     },
   },
   {
